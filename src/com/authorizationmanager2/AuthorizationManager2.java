@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import com.authorizationmanager2.data.FileBank;
 import com.authorizationmanager2.data.DataUser;
 import com.authorizationmanager2.data.DataUserId;
 import com.authorizationmanager2.screens.DelUserScrn;
@@ -52,10 +55,12 @@ import com.authorizationmanager2.screens.UpdUsrIdScrn;
  * @author pfrolich
  * @version 1.0 Date : September 2020
  * 
- *          This is a program for managing users and passwords. 1. create new
- *          users and userid's 2. update users and options for userid's 3.
- *          delete users 4. list users and userid's 5. reset and revoke
- *          passwords ( password will be initial "Welcome")
+ *          This is a program for managing users and passwords. 
+ *          1. create new users and userid's 
+ *          2. update users and options for userid's 
+ *          3. delete users 
+ *          4. list users and userid's 
+ *          5. reset and revoke passwords (password will be an initial password)
  */
 
 public class AuthorizationManager2 extends JFrame implements ActionListener {
@@ -99,7 +104,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private static JTextArea empty2;
 	private JTextArea empty3;
 	private JTextField userId;
-	public static JPasswordField codeInp;
 
 	private static JLabel usrSelect;
 	private JLabel userText;
@@ -107,29 +111,29 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private JLabel name;
 	private JLabel loggedIn;
 	private JLabel status;
-	public static JLabel codeTxt;
 
 	private JLabel lgnName;
 	private JLabel password;
-	private JLabel fCode;
 
 	private static JTextField inputName;
 	private JTextField beforeEnter;
 	private static JPasswordField inputPassword;
-	public static JPasswordField inputCode;
 	public static String loginName;
 
 	private JLabel oldPw;
 	private JLabel pwdNew1;
 	private JLabel pwdNew2;
+	private JLabel iPwdTxt;
 
 	public static JPasswordField inpOldPw;
 	public static JPasswordField inpPwdNew1;
 	public static JPasswordField inpPwdNew2;
+	public static JPasswordField iPwdInp;
 
 	public static char[] pwOld;
 	public static char[] pwNew1;
 	public static char[] pwNew2;
+	public static char[] iPwdNew;
 
 	private JTable table1;
 	private JTable table2;
@@ -140,9 +144,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 	private Boolean blocked = false;
 	private String inpUser;
-
+	private String inpIPw;
 	private String newPwd;
-	private String chkPwd;
 	private static String usrPat;
 	private Boolean existToRevoke;
 	private Boolean existToReset;
@@ -177,7 +180,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private Boolean isVal;
 	private Boolean isBlock;
 	private String isLvl;
-	public static String selCd;
+	private String chkPwStat;
 	public static int maxId;
 
 	public AuthorizationManager2() {
@@ -196,6 +199,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 	// encryption/decryption
 	private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
+	private static final String eCode = "Kp&9011";
 
 	private static final int TAG_LENGTH_BIT = 128; // must be one of {128, 120, 112, 104, 96}
 	private static final int IV_LENGTH_BYTE = 12;
@@ -381,8 +385,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	/*
-	 * create midLeftTopPanel - part of midLeftPanel contents - JCombobox - empty
-	 * JTextarea's for filling up space - JButtons
+	 * create midLeftTopPanel - part of midLeftPanel 
+	 * contents - JCombobox 
+	 * 			- empty JTextarea's for filling up space
+	 *  		- JButtons
 	 */
 	private Component midLeftTopPanel() {
 		setMidLeftTopPanel(new JPanel());
@@ -409,14 +415,14 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		getCmbUser().setActionCommand("usrSel");
 		usrPat = "default";
 
-		codeTxt = new JLabel("Encrypt-code: ");
-		codeTxt.setForeground(vlgreen);
-		codeTxt.setFont(fontTxt);
-		codeTxt.setBorder(null);
+		iPwdTxt = new JLabel("new Password : ");
+		iPwdTxt.setForeground(vlgreen);
+		iPwdTxt.setFont(fontTxt);
+		iPwdTxt.setBorder(null);
 
-		codeInp = new JPasswordField(12);
-		codeInp.setFont(fontTxt);
-		codeInp.setBackground(Color.white);
+		iPwdInp = new JPasswordField(12);
+		iPwdInp.setFont(fontTxt);
+		iPwdInp.setBackground(Color.white);
 
 		setEmpty2(new JTextArea(8, 20));
 		getEmpty2().setEditable(false);
@@ -464,8 +470,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		return getMidLeftTopPanel();
 	}
 	/*
-	 * Create midLeftBotPanel - part of midLeftPanel Content - JButton (Quit
-	 * program)
+	 * Create midLeftBotPanel - part of midLeftPanel 
+	 * Content - JButton (Quit  program)
 	 */
 
 	private Component midLeftBotPanel() {
@@ -489,7 +495,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	/*
-	 * Create midPanel - part of mainPanel Content - logon Screen. disappears after
+	 * Create midPanel - part of mainPanel Content - login Screen. disappears after
 	 * login
 	 */
 
@@ -539,7 +545,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		loginPanelL.setLayout(new FlowLayout(20, 10, 20));
 		loginPanelL.setBackground(greend1);
 
-		empty = new JTextArea(1, 11);
+		empty = new JTextArea(3, 11);
 		empty.setEditable(false);
 		empty.setBackground(greend1);
 
@@ -553,15 +559,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		password.setFont(fontLogin);
 		password.setBorder(null);
 
-		fCode = new JLabel("File-code :");
-		fCode.setForeground(vlgreen);
-		fCode.setFont(fontLogin);
-		fCode.setBorder(null);
-
 		loginPanelL.add(empty);
 		loginPanelL.add(lgnName);
 		loginPanelL.add(password);
-		loginPanelL.add(fCode);
+
 		return loginPanelL;
 	}
 
@@ -585,11 +586,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		inputPassword.addActionListener(this);
 		inputPassword.setActionCommand("enter");
 
-		inputCode = new JPasswordField(11);
-		inputCode.setFont(fontLogin);
-		inputCode.addActionListener(this);
-		inputCode.setActionCommand("enter");
-
 		beforeEnter = new JTextField(11);
 		beforeEnter.setBackground(greend1);
 		beforeEnter.setBorder(null);
@@ -604,7 +600,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		loginPanelR.add(empty);
 		loginPanelR.add(inputName);
 		loginPanelR.add(inputPassword);
-		loginPanelR.add(inputCode);
 		loginPanelR.add(beforeEnter);
 		loginPanelR.add(enter);
 
@@ -756,9 +751,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			loginName = inputName.getText();
 			char[] getPassWrd = inputPassword.getPassword();
 			String loginPassWrd = String.valueOf(getPassWrd);
-			char[] getCode = inputCode.getPassword();
-			selCd = String.valueOf(getCode);
-
 			Boolean valid;
 
 			// getLoginScrn().setVisible(false);
@@ -768,15 +760,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			boolean exists2 = tempFile2.exists();
 
 			if (!exists1) {
-				// String selPwd = "Admin";
 				String selPwd = "Admin";
-				// String selCd1 = "0000";
-				String selCd1 = "0";
-				// String newPwd;
 				try {
-					newPwd = encrypt(selPwd.getBytes(UTF_8), selCd1);
-					userIdData
-							.add(new DataUserId(10001, "Admin", newPwd, "2021-02-01", "2099-06-25", true, false, "1"));
+					newPwd = encrypt(selPwd.getBytes(UTF_8), eCode);
+					userIdData.add(
+							new DataUserId(10001, "Admin", newPwd, "2021-02-01", "2099-06-25", true, false, "1", "c"));
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
@@ -808,8 +796,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							Boolean col5 = Boolean.parseBoolean(temp[5]);
 							Boolean col6 = Boolean.parseBoolean(temp[6]);
 							String col7 = temp[7];
+							String col8 = temp[8];
 
-							userIdData.add(new DataUserId(col0, col1, col2, col3, col4, col5, col6, col7));
+							userIdData.add(new DataUserId(col0, col1, col2, col3, col4, col5, col6, col7, col8));
 						}
 						userData.clear();
 						while ((line2 = br2.readLine()) != null) {
@@ -847,43 +836,14 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 				isLvl = d1.getLvl();
 				valid = isVal;
 				blocked = isBlock;
-				chkPwd = "welkom";
+				chkPwStat = d1.getPwStat();
 
 				try {
-					newPwd = decrypt(isPwd, selCd);
-					// chkPwd = decrypt("welkom", selCd);
-
+					newPwd = decrypt(isPwd, eCode);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
-					// JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
-					// return;
 				}
 
-				if (loginName.equals(isUser) && loginPassWrd.equals(chkPwd)) {
-					JTextArea emptyN = new JTextArea(9, 10);
-					emptyN.setEditable(false);
-					emptyN.setBackground(vlgreen);
-					JTextArea emptyW = new JTextArea(30, 4);
-					emptyW.setEditable(false);
-					emptyW.setBackground(vlgreen);
-					JTextArea emptyS = new JTextArea(9, 10);
-					emptyS.setEditable(false);
-					emptyS.setBackground(vlgreen);
-					JTextArea emptyE = new JTextArea(30, 4);
-					emptyE.setEditable(false);
-					emptyE.setBackground(vlgreen);
-					midPanel.removeAll();
-					midPanel.add(emptyN, BorderLayout.NORTH);
-					midPanel.add(emptyW, BorderLayout.WEST);
-					midPanel.add(emptyE, BorderLayout.EAST);
-					midPanel.add(emptyS, BorderLayout.SOUTH);
-					midPanel.add(chgPwdPanel(), BorderLayout.CENTER);
-
-					midPanel.revalidate();
-					midPanel.repaint();
-
-					return;
-				}
 				if (loginName.equals(isUser) && loginPassWrd.equals(newPwd)) {
 					if (isLvl.matches("1")) {
 						if (valid && blocked) {
@@ -893,26 +853,55 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 									"Login error", JOptionPane.INFORMATION_MESSAGE);
 							return;
 						}
-						if (valid && !blocked) {
-							status.setForeground(Color.green);
-							status.setText("true");
-							name.setText("name: " + isUser);
-							mainPanel.remove(midPanel);
-							getMidRightPanel().setPreferredSize(new Dimension(720, 580));
-							mainPanel.revalidate();
-							mainPanel.repaint();
-							getMidLeftTopPanel().add(combo);
-							getMidLeftTopPanel().add(ok);
-							getMidLeftTopPanel().add(getEmpty2());
-							getMidLeftTopPanel().add(codeTxt);
-							getMidLeftTopPanel().add(codeInp);
-
-							codeInp.setText(null);
-
-							getLog().info("User " + loginName + " logged in ");
-
-							JOptionPane.showMessageDialog(null, "Data Imported");
+						if (!valid) {
+							JFrame message = new JFrame();
+							JOptionPane.showMessageDialog(message,
+									"Your userid revoked !!! \n \n Call your System Administrator \n", "Login error",
+									JOptionPane.INFORMATION_MESSAGE);
 							return;
+						}
+						if (valid && !blocked) {
+							if (loginName.equals(isUser) && chkPwStat.equals("i")) {
+								JTextArea emptyN = new JTextArea(9, 10);
+								emptyN.setEditable(false);
+								emptyN.setBackground(vlgreen);
+								JTextArea emptyW = new JTextArea(30, 4);
+								emptyW.setEditable(false);
+								emptyW.setBackground(vlgreen);
+								JTextArea emptyS = new JTextArea(9, 10);
+								emptyS.setEditable(false);
+								emptyS.setBackground(vlgreen);
+								JTextArea emptyE = new JTextArea(30, 4);
+								emptyE.setEditable(false);
+								emptyE.setBackground(vlgreen);
+								midPanel.removeAll();
+								midPanel.add(emptyN, BorderLayout.NORTH);
+								midPanel.add(emptyW, BorderLayout.WEST);
+								midPanel.add(emptyE, BorderLayout.EAST);
+								midPanel.add(emptyS, BorderLayout.SOUTH);
+								midPanel.add(chgPwdPanel(), BorderLayout.CENTER);
+
+								midPanel.revalidate();
+								midPanel.repaint();
+
+								return;
+							} else {
+								status.setForeground(Color.green);
+								status.setText("true");
+								name.setText("name: " + isUser);
+								mainPanel.remove(midPanel);
+								getMidRightPanel().setPreferredSize(new Dimension(720, 580));
+								mainPanel.revalidate();
+								mainPanel.repaint();
+								getMidLeftTopPanel().add(combo);
+								getMidLeftTopPanel().add(ok);
+								getMidLeftTopPanel().add(getEmpty2());
+
+								getLog().info("User " + loginName + " logged in ");
+
+								JOptionPane.showMessageDialog(null, "Data Imported");
+								return;
+							}
 						}
 					} else {
 						JFrame message = new JFrame();
@@ -953,6 +942,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			String selLvl;
 			String selPwd;
 			String selPwe;
+			String selPwStat;
 
 			try {
 				for (int i = 0; i < userIdData.size(); i++) {
@@ -965,14 +955,15 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						selVal = userIdData.get(i).getVal();
 						selBlk = userIdData.get(i).getBlock();
 						selLvl = userIdData.get(i).getLvl();
-						selPwd = decrypt(selPw, selCd);
-						selPwe = encrypt(newPw1.getBytes(UTF_8), selCd);
+						selPwd = decrypt(selPw, eCode);
+						selPwe = encrypt(newPw1.getBytes(UTF_8), eCode);
+						selPwStat = "c";
 
 						if (oldPw.equals(selPwd)) {
 
 							if (newPw1.equals(newPw2)) {
 								userIdData.set(i, new DataUserId(selId, selUser, selPwe, selSdate, selEdate, selVal,
-										selBlk, selLvl));
+										selBlk, selLvl, selPwStat));
 
 								JFrame message = new JFrame();
 								JOptionPane.showMessageDialog(message, "Your password is changed \n", "Info",
@@ -1002,6 +993,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								String col5;
 								String col6;
 								String col7;
+								String col8;
 
 								// loop for table rows
 								for (DataUserId d2 : userIdData) {
@@ -1013,10 +1005,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 									col5 = Boolean.toString(d2.getVal());
 									col6 = Boolean.toString(d2.getBlock());
 									col7 = d2.getLvl();
+									col8 = d2.getPwStat();
 
 									if (!col1.equals("Admin")) {
 										bw2.write(col0 + ";" + col1 + ";" + col2 + ";" + col3 + ";" + col4 + ";" + col5
-												+ ";" + col6 + ";" + col7 + ";");
+												+ ";" + col6 + ";" + col7 + ";" + col8 + ";");
 										// break line at the end
 										bw2.write("\n");
 									}
@@ -1132,8 +1125,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().add(combo);
 					getMidLeftTopPanel().add(ok);
 					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(codeTxt);
-					getMidLeftTopPanel().add(codeInp);
 					getMidLeftTopPanel().add(getUsrSelect());
 					getMidLeftTopPanel().add(getCmbUser());
 					getMidLeftTopPanel().revalidate();
@@ -1199,10 +1190,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().add(combo);
 					getMidLeftTopPanel().add(ok);
 					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(codeTxt);
-					getMidLeftTopPanel().add(codeInp);
 					getMidLeftTopPanel().add(userText);
 					getMidLeftTopPanel().add(userId);
+					getMidLeftTopPanel().add(iPwdTxt);
+					getMidLeftTopPanel().add(iPwdInp);
 					getMidLeftTopPanel().add(ok2);
 
 					getMidLeftTopPanel().revalidate();
@@ -1268,7 +1259,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					option = "userid";
 
 					String[] columnNames = { "Auth_Id", "UserId", "Start-date", "End-date", "Valid", "Blocked",
-							"Level" };
+							"Level", "Pw-Stat" };
 					DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
 					for (DataUserId d1 : userIdData) {
@@ -1279,8 +1270,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						String valid1 = Boolean.toString(d1.getVal());
 						String blocked1 = Boolean.toString(d1.getBlock());
 						String level = d1.getLvl();
+						String pwStat = d1.getPwStat();
 
-						String[] data = { authid, uname, sdate, edate, valid1, blocked1, level };
+						String[] data = { authid, uname, sdate, edate, valid1, blocked1, level, pwStat};
 						tableModel.addRow(data);
 					}
 
@@ -1303,11 +1295,13 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					table2.getColumnModel().getColumn(4).setPreferredWidth(80);
 					table2.getColumnModel().getColumn(5).setPreferredWidth(80);
 					table2.getColumnModel().getColumn(6).setPreferredWidth(70);
+ 					table2.getColumnModel().getColumn(7).setPreferredWidth(70);
 					table2.getColumnModel().getColumn(2).setCellRenderer(center);
 					table2.getColumnModel().getColumn(3).setCellRenderer(center);
 					table2.getColumnModel().getColumn(4).setCellRenderer(center);
 					table2.getColumnModel().getColumn(5).setCellRenderer(center);
 					table2.getColumnModel().getColumn(6).setCellRenderer(center);
+ 					table2.getColumnModel().getColumn(7).setCellRenderer(center);
 
 					setJsp(new JScrollPane(table2));
 					getJsp().setBackground(greend1);
@@ -1357,27 +1351,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().add(combo);
 					getMidLeftTopPanel().add(ok);
 					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(codeTxt);
-					getMidLeftTopPanel().add(codeInp);
 
 					getMidLeftTopPanel().revalidate();
 					getMidLeftTopPanel().repaint();
-					boolean existsToWrite = false;
-					char[] getCodeW = codeInp.getPassword();
-					String selCdW = String.valueOf(getCodeW);
+					boolean existsToWrite = true;
 
-					if (!selCdW.isEmpty()) {
-						try {
-							existsToWrite = true;
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
-							return;
-						}
-					} else {
-						JOptionPane.showMessageDialog(null, "Fill in Encrypt-Code");
-						return;
-					}
 					if (existsToWrite) {
 						try {
 							Path source1 = Paths.get("C:\\JAR-programs\\Documents\\authuser2.txt");
@@ -1406,6 +1384,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							String col5;
 							String col6;
 							String col7;
+							String col8;
 
 							// loop for table rows
 							for (DataUser d1 : userData) {
@@ -1437,10 +1416,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								col5 = Boolean.toString(d2.getVal());
 								col6 = Boolean.toString(d2.getBlock());
 								col7 = d2.getLvl();
+								col8 = d2.getPwStat();
 
 								if (!col1.equals("Admin")) {
 									bw2.write(col0 + ";" + col1 + ";" + col2 + ";" + col3 + ";" + col4 + ";" + col5
-											+ ";" + col6 + ";" + col7 + ";");
+											+ ";" + col6 + ";" + col7 + ";" + col8 + ";");
 									// break line at the begin
 									// break line at the end
 									bw2.write("\n");
@@ -1453,7 +1433,56 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							fw1.close();
 							fw2.close();
 							JOptionPane.showMessageDialog(null, "Data Exported");
-							inputCode = null;
+//							inputCode = null;
+							/*
+							 * Cleaning History user files
+							 */
+
+							ArrayList<FileBank> filesUsr = new ArrayList<>();
+							filesUsr.clear();
+
+							File tmp1 = new File("C:/JAR-programs/Documents/backup");
+							FilenameFilter filter1 = (file, s) -> s.startsWith("authuser2-history");
+							File[] list1 = tmp1.listFiles(filter1);
+
+							if (list1 != null) {
+								Arrays.stream(list1).forEach(file -> {
+									filesUsr.add(new FileBank(file.getPath()));
+								});
+							}
+
+							File delUsrF;
+							if (filesUsr.size() > 10) {
+								for (int i = 0; i < (filesUsr.size() - 10); i++) {
+									delUsrF = new File(filesUsr.get(i).getFiles());
+									delUsrF.delete();
+
+								}
+							}
+
+							/*
+							 * Cleaning History userId files
+							 */
+							ArrayList<FileBank> filesUid = new ArrayList<>();
+							filesUid.clear();
+
+							File tmp2 = new File("C:/JAR-programs/Documents/backup");
+							FilenameFilter filter2 = (file, s) -> s.startsWith("authuserid2-history");
+							File[] list2 = tmp2.listFiles(filter2);
+
+							if (list2 != null) {
+								Arrays.stream(list2).forEach(file -> {
+									filesUid.add(new FileBank(file.getPath()));
+								});
+							}
+
+							File delUidF;
+							if (filesUid.size() > 10) {
+								for (int i = 0; i < (filesUid.size() - 10); i++) {
+									delUidF = new File(filesUid.get(i).getFiles());
+									delUidF.delete();
+								}
+							}
 
 						} catch (Exception ex) {
 							ex.printStackTrace();
@@ -1476,76 +1505,58 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().revalidate();
 					getMidLeftTopPanel().repaint();
 
-					boolean existsToRead = false;
-					char[] getCodeR = codeInp.getPassword();
-					String selCdR = String.valueOf(getCodeR);
+					userData.clear();
+					userIdData.clear();
+					try {
+						BufferedReader br1 = new BufferedReader(
+								new FileReader("C:\\JAR-programs\\Documents\\authuserid2.txt"));
+						BufferedReader br2 = new BufferedReader(
+								new FileReader("C:\\JAR-programs\\Documents\\authuser2.txt"));
+						String line1;
+						String line2;
 
-					if (!selCdR.isEmpty()) {
-						try {
-							existsToRead = true;
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
-							return;
+						while ((line1 = br1.readLine()) != null) {
+
+							String[] temp = line1.split(COMMA_DELIMITER);
+							int col0 = Integer.parseInt(temp[0]);
+							String col1 = temp[1];
+							String col2 = temp[2];
+							String col3 = temp[3];
+							String col4 = temp[4];
+							Boolean col5 = Boolean.parseBoolean(temp[5]);
+							Boolean col6 = Boolean.parseBoolean(temp[6]);
+							String col7 = temp[7];
+							String col8 = temp[8];
+
+							userIdData.add(new DataUserId(col0, col1, col2, col3, col4, col5, col6, col7, col8));
+
 						}
-					} else {
-						JOptionPane.showMessageDialog(null, "Fill in Encrypt-Code");
-						return;
-					}
-					if (existsToRead) {
-						userData.clear();
-						userIdData.clear();
-						try {
-							BufferedReader br1 = new BufferedReader(
-									new FileReader("C:\\JAR-programs\\Documents\\authuserid2.txt"));
-							BufferedReader br2 = new BufferedReader(
-									new FileReader("C:\\JAR-programs\\Documents\\authuser2.txt"));
-							String line1;
-							String line2;
+						while ((line2 = br2.readLine()) != null) {
 
-							while ((line1 = br1.readLine()) != null) {
+							String[] temp = line2.split(COMMA_DELIMITER);
+							int col0 = Integer.parseInt(temp[0]);
+							String col1 = temp[1];
+							String col2 = temp[2];
+							String col3 = temp[3];
+							String col4 = temp[4];
+							String col5 = temp[5];
 
-								String[] temp = line1.split(COMMA_DELIMITER);
-								int col0 = Integer.parseInt(temp[0]);
-								String col1 = temp[1];
-								String col2 = temp[2];
-								String col3 = temp[3];
-								String col4 = temp[4];
-								Boolean col5 = Boolean.parseBoolean(temp[5]);
-								Boolean col6 = Boolean.parseBoolean(temp[6]);
-								String col7 = temp[7];
+							userData.add(new DataUser(col0, col1, col2, col3, col4, col5));
 
-								userIdData.add(new DataUserId(col0, col1, col2, col3, col4, col5, col6, col7));
-
-							}
-							while ((line2 = br2.readLine()) != null) {
-
-								String[] temp = line2.split(COMMA_DELIMITER);
-								int col0 = Integer.parseInt(temp[0]);
-								String col1 = temp[1];
-								String col2 = temp[2];
-								String col3 = temp[3];
-								String col4 = temp[4];
-								String col5 = temp[5];
-
-								userData.add(new DataUser(col0, col1, col2, col3, col4, col5));
-
-							}
-							br1.close();
-							br2.close();
-
-						} catch (FileNotFoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
 						}
-						JOptionPane.showMessageDialog(null, "Data Imported");
+						br1.close();
+						br2.close();
 
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
+					JOptionPane.showMessageDialog(null, "Data Imported");
+
 				}
-
 				break;
 
 			} else {
@@ -1580,9 +1591,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						Boolean val = false;
 						Boolean blk = userIdData.get(i).getBlock();
 						String level = userIdData.get(i).getLvl();
+						String pwStat = userIdData.get(i).getPwStat();
 
 						AuthorizationManager2.userIdData.set(i,
-								new DataUserId(authId, inpUser, selPwd1, sdate, newEdate, val, blk, level));
+								new DataUserId(authId, inpUser, selPwd1, sdate, newEdate, val, blk, level, pwStat));
 
 						AuthorizationManager2.getLog().info("userid: " + inpUser + " revoked");
 						JFrame message = new JFrame();
@@ -1596,6 +1608,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
+			getMidLeftTopPanel().removeAll();
+			getMidLeftTopPanel().add(combo);
+			getMidLeftTopPanel().add(ok);
+			getMidLeftTopPanel().add(getEmpty2());
+			getMidLeftTopPanel().revalidate();
+			getMidLeftTopPanel().repaint();
 
 			break;
 		/*
@@ -1603,57 +1621,111 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		 */
 		case "ok2":
 			inpUser = userId.getText();
-			existToReset = false;
-			char[] getCodeR = codeInp.getPassword();
-			String selCdR = String.valueOf(getCodeR);
+			iPwdNew = iPwdInp.getPassword();
+			inpIPw = String.valueOf(iPwdNew);
 
-			if (inpUser.isEmpty()) {
+			existToReset = false;
+
+			if (inpUser.isEmpty() || inpIPw.isEmpty()) {
 				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "No input !!", "info", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(message, "User or new Password is missing \n Fill in the fields ", "info",
+						JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				for (int i = 0; i < userIdData.size(); i++) {
 					if (userIdData.get(i).getUser().equals(inpUser)) {
 						existToReset = true;
 
 						int authId = userIdData.get(i).getId();
-						String insPw = "welkom";
-						String newPwd;
-						if (!selCdR.isEmpty()) {
-							try {
-								newPwd = encrypt(insPw.getBytes(UTF_8), selCdR);
-							} catch (Exception e1) {
-								// TODO Auto-generated catch block
-								JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
-								return;
+						String newPwd2;
+						try {
+							String user = userIdData.get(i).getUser();
+							newPwd2 = encrypt(inpIPw.getBytes(UTF_8), eCode);
+							String sdate = userIdData.get(i).getsDate();
+							String edate = userIdData.get(i).getmDate();
+							Boolean val = false;
+							Boolean blk = userIdData.get(i).getBlock();
+							String level = userIdData.get(i).getLvl();
+							String pwStat = "i";
+							AuthorizationManager2.userIdData.set(i,
+									new DataUserId(authId, user, newPwd2, sdate, edate, val, blk, level, pwStat));
+
+							AuthorizationManager2.getLog().info("userid: " + user + " resetted");
+							System.out.println(newPwd2);
+							/*
+							 * write to file after password change
+							 */
+							Path source2 = Paths.get("C:\\JAR-programs\\Documents\\authuserid2.txt");
+							Path dest2 = Paths.get("C:\\JAR-programs\\Documents\\backup\\authuserid2-history.txt");
+
+							if (Files.exists(source2)) {
+								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
-						} else {
-							JOptionPane.showMessageDialog(null, "Fill in Encrypt-Code");
-							return;
+
+							File file2 = new File("C:\\JAR-programs\\Documents\\authuserid2.txt");
+
+							FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
+							BufferedWriter bw2 = new BufferedWriter(fw2);
+
+							String col0;
+							String col1;
+							String col2;
+							String col3;
+							String col4;
+							String col5;
+							String col6;
+							String col7;
+							String col8;
+
+							// loop for table rows
+							for (DataUserId d2 : userIdData) {
+								col0 = Integer.toString(d2.getId());
+								col1 = d2.getUser();
+								col2 = d2.getdPwd();
+								col3 = d2.getsDate();
+								col4 = d2.getmDate();
+								col5 = Boolean.toString(d2.getVal());
+								col6 = Boolean.toString(d2.getBlock());
+								col7 = d2.getLvl();
+								col8 = d2.getPwStat();
+
+								if (!col1.equals("Admin")) {
+									bw2.write(col0 + ";" + col1 + ";" + col2 + ";" + col3 + ";" + col4 + ";" + col5
+											+ ";" + col6 + ";" + col7 + ";" + col8 + ";");
+									// break line at the end
+									bw2.write("\n");
+								}
+							}
+							getLog().info("File authuserid2 has changed");
+							// close BufferedWriter
+							bw2.close();
+							// close FileWriter
+							fw2.close();
+							/*
+							 * end write to file
+							 */
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
 						}
-						String sdate = userIdData.get(i).getsDate();
-						String edate = userIdData.get(i).getmDate();
-						Boolean val = false;
-						Boolean blk = userIdData.get(i).getBlock();
-						String level = userIdData.get(i).getLvl();
-						AuthorizationManager2.userIdData.set(i,
-								new DataUserId(authId, inpUser, newPwd, sdate, edate, val, blk, level));
-
-						AuthorizationManager2.getLog().info("userid: " + inpUser + " resetted");
-
 						JFrame message = new JFrame();
 						JOptionPane.showMessageDialog(message,
-								"user " + inpUser + " resetted \n new initial password is 'welkom'", "Info",
+								"user " + inpUser + " resetted \n new initial password is " + inpIPw, "Info",
 								JOptionPane.INFORMATION_MESSAGE);
+
 					}
 				}
-				// }
-
 				if (!existToReset) {
 					JFrame message = new JFrame();
 					JOptionPane.showMessageDialog(message, "user_id doesn't exists !!! \n Retry", "Info",
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
+			getMidLeftTopPanel().removeAll();
+			getMidLeftTopPanel().add(combo);
+			getMidLeftTopPanel().add(ok);
+			getMidLeftTopPanel().add(getEmpty2());
+			getMidLeftTopPanel().revalidate();
+			getMidLeftTopPanel().repaint();
+
 			break;
 		/*
 		 * case back: is used for go back from the Listings (User & Userid's)

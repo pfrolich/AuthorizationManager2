@@ -354,8 +354,6 @@ public class UpdUserScrn extends JPanel implements ActionListener {
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.combo);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.ok);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.getEmpty2());
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeTxt);
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeInp);
 
 			AuthorizationManager2.getMidLeftTopPanel().validate();
 			AuthorizationManager2.getMidLeftTopPanel().repaint();
@@ -403,7 +401,7 @@ public class UpdUserScrn extends JPanel implements ActionListener {
 				JFrame message = new JFrame();
 				JOptionPane.showMessageDialog(message, "User " + inpSname.getText() + " changed", "INFO",
 						JOptionPane.INFORMATION_MESSAGE);
-				// JOptionPane.set
+
 				inpId.setText("");
 				inpFname.setText("");
 				inpSname.setText("");

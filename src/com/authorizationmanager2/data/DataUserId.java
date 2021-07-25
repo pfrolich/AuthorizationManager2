@@ -10,8 +10,9 @@ public class DataUserId {
 	private Boolean val;
 	private Boolean block;
 	private String  lvl;
+	private String pwStat;
 	public DataUserId(int id, String user, String dPwd, String sDate, String mDate, Boolean val, Boolean block,
-			String lvl) {
+			String lvl, String pwStat) {
 		super();
 		this.id = id;
 		this.user = user;
@@ -21,6 +22,7 @@ public class DataUserId {
 		this.val = val;
 		this.block = block;
 		this.lvl = lvl;
+		this.pwStat = pwStat;
 	}
 	public int getId() {
 		return id;
@@ -70,5 +72,11 @@ public class DataUserId {
 	public void setLvl(String lvl) {
 		this.lvl = lvl;
 	}
-	
+	public String getPwStat() {
+		return pwStat;
+	}
+	public void setPwStat(String pwStat) {
+		this.pwStat = pwStat;
+	}
+
 }

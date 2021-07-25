@@ -407,8 +407,6 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.combo);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.ok);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.getEmpty2());
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeTxt);
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeInp);
 
 			AuthorizationManager2.getMidLeftTopPanel().validate();
 			AuthorizationManager2.getMidLeftTopPanel().repaint();
@@ -458,8 +456,9 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 					if (AuthorizationManager2.userIdData.get(i).getId() == selId) {
 
 						selPwd = AuthorizationManager2.userIdData.get(i).getdPwd();
+						String selPwStat = AuthorizationManager2.userIdData.get(i).getPwStat();
 						AuthorizationManager2.userIdData.set(i,
-								new DataUserId(selId, selUser, selPwd, updSdate, updEdate, updVal, updBlk, updLvl));
+								new DataUserId(selId, selUser, selPwd, updSdate, updEdate, updVal, updBlk, updLvl, selPwStat));
 					}
 				}
 				AuthorizationManager2.getLog()

@@ -48,6 +48,8 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	private JTextField inpEmail;
 	private JTextField inpId;
 	private JTextField inpUserId;
+	
+	private JPasswordField inpPwInit;
 
 	private JButton button;
 	private JButton ok;
@@ -57,7 +59,6 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	private String insEmail;
 	private String insSdate;
 	private int selId;
-	private String selCd;
 	private boolean checkS = false;
 
 	private JComboBox<String> comboValid;
@@ -93,6 +94,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 	// encryption/decryption
 	private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
+	private static final String eCode = "Kp&9011";
 
 	private static final int TAG_LENGTH_BIT = 128; // must be one of {128, 120, 112, 104, 96}
 	private static final int IV_LENGTH_BYTE = 12;
@@ -182,9 +184,9 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		midLPanel.setBackground(vlgreen);
 
 		String[] labelText = { "new Id :", "Name :", "Surname :", "Email-address :", "Start-date :", "Valid :",
-				"Create userid :" };
+				"Create userid :", "Init Password : " };
 
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 8; i++) {
 			label = new JLabel(labelText[i]);
 			label.setFont(fontTxt);
 			label.setForeground(greend1);
@@ -360,6 +362,23 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		userId.add(emptyO);
 		userId.add(inpUserId);
 		userId.add(ok);
+		
+		JPanel pwInit = new JPanel();
+		pwInit.setPreferredSize(new Dimension(420, 40));
+		pwInit.setBackground(vlgreen);
+		pwInit.setLayout(new FlowLayout(0, 10, 0));
+
+		JTextField emptyP = new JTextField(30);
+		emptyP.setBorder(null);
+		emptyP.setEditable(false);
+		emptyP.setBackground(vlgreen);
+
+		inpPwInit = new JPasswordField(10);
+		inpPwInit.setBackground(Color.white);
+		inpPwInit.setFont(fontTxt);
+				
+		pwInit.add(emptyP);
+		pwInit.add(inpPwInit);
 
 		midRPanel.add(id);
 		midRPanel.add(name);
@@ -368,6 +387,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		midRPanel.add(comboDateBox);
 		midRPanel.add(valid);
 		midRPanel.add(userId);
+		midRPanel.add(pwInit);
 
 		return midRPanel;
 	}
@@ -416,8 +436,6 @@ public class NewUserScrn extends JPanel implements ActionListener {
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.combo);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.ok);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.getEmpty2());
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeTxt);
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeInp);
 
 			AuthorizationManager2.getMidLeftTopPanel().validate();
 			AuthorizationManager2.getMidLeftTopPanel().repaint();
@@ -503,10 +521,19 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		 * Create an userid and add to the arraylist DataUserId
 		 */
 		case "ok":
+			char[] getPwdI = inpPwInit.getPassword();
+			String selPwdI = String.valueOf(getPwdI);
 			if (checkS) {
 				if (AuthorizationManager2.getUsrPat().matches("default")) {
 					JFrame message = new JFrame();
 					JOptionPane.showMessageDialog(message, "Choose an user pattern!!", "Warning",
+							JOptionPane.INFORMATION_MESSAGE);
+					
+					return;
+				}
+				if(selPwdI.isEmpty()) {
+					JFrame message = new JFrame();
+					JOptionPane.showMessageDialog(message, "Field Init Password is empty !!", "Info",
 							JOptionPane.INFORMATION_MESSAGE);
 					return;
 				} else {
@@ -516,19 +543,18 @@ public class NewUserScrn extends JPanel implements ActionListener {
 					inpUserId.setText(useridN);
 
 					boolean exists = false;
-					char[] getCode1 = AuthorizationManager2.codeInp.getPassword();
-					selCd = String.valueOf(getCode1);
-					String insPw = "welkom";
+
 					String insEdate = "9999-12-31";
 					String selValid1 = (String) comboValid.getSelectedItem();
 					Boolean val1 = Boolean.parseBoolean(selValid1);
 					Boolean block1 = false;
 					String selLvl = "2";
+					String selPwStat = "i";
 
 					String newPwd;
-					if (!selCd.isEmpty()) {
+					
 						try {
-							newPwd = encrypt(insPw.getBytes(UTF_8), selCd);
+							newPwd = encrypt(selPwdI.getBytes(UTF_8), eCode);
 							for (DataUserId d1 : AuthorizationManager2.userIdData) {
 								userid = d1.getUser();
 								if (useridN.equals(userid)) {
@@ -543,7 +569,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 							}
 							if (!exists) {
 								AuthorizationManager2.userIdData.add(new DataUserId(selId, useridN, newPwd, insSdate,
-										insEdate, val1, block1, selLvl));
+										insEdate, val1, block1, selLvl, selPwStat));
 								AuthorizationManager2.getLog().info("UserId: " + useridN + " with startdate: "
 										+ insSdate + " inserted \n auth_id = " + selId);
 								JFrame message = new JFrame();
@@ -558,21 +584,14 @@ public class NewUserScrn extends JPanel implements ActionListener {
 								comboMthS.setSelectedIndex(mthNow - 1);
 								comboDayS.setSelectedIndex(dayNow - 1);
 								inpUserId.setText("");
-								AuthorizationManager2.codeInp.setText(null);
+								inpPwInit.setText("");
 								checkS = false;
-							}
+							} 
 
 						} catch (Exception e1) {
 							// TODO Auto-generated catch block
-							JOptionPane.showMessageDialog(null, "Wrong Encrypt-Code");
-							return;
 						}
-					} else {
-						JOptionPane.showMessageDialog(null, "Fill in Encrypt-Code");
-						return;
-					}
-
-				}
+			}
 				checkS = false;
 			} else {
 				JFrame message = new JFrame();

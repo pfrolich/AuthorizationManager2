@@ -354,8 +354,6 @@ public class DelUserScrn extends JPanel implements ActionListener {
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.combo);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.ok);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.getEmpty2());
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeTxt);
-			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.codeInp);
 
 			AuthorizationManager2.getMidLeftTopPanel().validate();
 			AuthorizationManager2.getMidLeftTopPanel().repaint();
