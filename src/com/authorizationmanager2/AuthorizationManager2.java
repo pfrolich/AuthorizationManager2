@@ -18,18 +18,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -139,8 +137,21 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private JTable table2;
 
 	private static Properties properties;
-	private static Connection conn;
-	private static Statement stmt;
+	private static String pathUsr;
+	private static String pathUid;
+	private static String pathUsrH;
+	private static String pathUidH;
+	private static String backup;
+	private static String fileExt;
+	private static String fileUsr;
+	private static String fileUid;
+	private static String pathLogProp;
+	private static String pathLogFile;
+	
+	private static LocalDateTime dateTime;
+	private static DateTimeFormatter dateFormatter;  
+	private static String fileDate;
+	
 
 	private Boolean blocked = false;
 	private String inpUser;
@@ -294,29 +305,35 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						}
 					}
 				});
-
+				
 				/*
-				 * load of propertiesfile for the connection of MYSQL database
+				 * load of propertiesfile authman.ini
 				 */
 				properties = new Properties();
 				userIdData = new ArrayList<>();
 				userData = new ArrayList<>();
-//	 			maxId = new ArrayList<>();
+
 				try {
-					properties.load(new FileInputStream("C:\\JAR-programs\\properties\\mysqlconn\\properties.txt"));
+					properties.load(new FileInputStream("C:\\JAR-programs\\properties\\authorizationmanager\\authman2.ini"));
+					
+					pathUsr = properties.getProperty("path-usr");
+					pathUsrH = properties.getProperty("path-usrh");
+					pathUid = properties.getProperty("path-uid");
+					pathUidH = properties.getProperty("path-uidh");
+					fileExt = properties.getProperty("file-ext");
+					backup = properties.getProperty("path-backup");
+					fileUsr = properties.getProperty("file-usr-startswith");
+					fileUid = properties.getProperty("file-uid-startswith");
+					pathLogProp = properties.getProperty("path-log-properties");
+					pathLogFile = properties.getProperty("path-log-file");
 
-					conn = DriverManager.getConnection(properties.getProperty("dburl") + TimeZone.getDefault().getID(),
-							properties.getProperty("username"), properties.getProperty("password"));
-					setStmt(conn.createStatement());
-
-					LogManager.getLogManager().readConfiguration(new FileInputStream(
-							"C:\\JAR-programs\\properties\\authorizationmanager\\logproperties.txt"));
+					LogManager.getLogManager().readConfiguration(new FileInputStream(pathLogProp));
 					log.setLevel(Level.FINE);
-					logFile = new FileHandler("C:\\JAR-programs\\logs\\authorizationmanager.log", true);
+					logFile = new FileHandler(pathLogFile, true);
 					logFile.setFormatter(new com.authorizationmanager2.logging.MyFormatter());
 					getLog().addHandler(logFile);
 
-				} catch (SQLException | IOException e1) {
+				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -754,8 +771,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			Boolean valid;
 
 			// getLoginScrn().setVisible(false);
-			File tempFile1 = new File("C:\\JAR-programs\\Documents\\authuserid2.txt");
-			File tempFile2 = new File("C:\\JAR-programs\\Documents\\authuser2.txt");
+			File tempFile1 = new File(pathUid);
+			File tempFile2 = new File(pathUsr);
 			boolean exists1 = tempFile1.exists();
 			boolean exists2 = tempFile2.exists();
 
@@ -773,15 +790,15 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 			} else {
 				if (exists1 && !exists2) {
-					JOptionPane.showMessageDialog(null, "Incomplete files !! \n File authuserdata2.txt is missing");
+					JOptionPane.showMessageDialog(null, "Incomplete files !! \n File authuser2.txt is missing");
 					return;
 				}
 				if (exists1 && exists2) {
 					try {
 						BufferedReader br1 = new BufferedReader(
-								new FileReader("C:\\JAR-programs\\Documents\\authuserid2.txt"));
+								new FileReader(pathUid));
 						BufferedReader br2 = new BufferedReader(
-								new FileReader("C:\\JAR-programs\\Documents\\authuser2.txt"));
+								new FileReader(pathUsr));
 						String line1;
 						String line2;
 						userIdData.clear();
@@ -945,6 +962,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			String selPwStat;
 
 			try {
+				dateTime = LocalDateTime.now();
+				dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy-HHmmss");
+				fileDate = dateTime.format(dateFormatter);
 				for (int i = 0; i < userIdData.size(); i++) {
 					if (userIdData.get(i).getUser().equals(loginName)) {
 						selId = userIdData.get(i).getId();
@@ -973,14 +993,14 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								/*
 								 * write to file after password change
 								 */
-								Path source2 = Paths.get("C:\\JAR-programs\\Documents\\authuserid2.txt");
-								Path dest2 = Paths.get("C:\\JAR-programs\\Documents\\backup\\authuserid2-history.txt");
+								Path source2 = Paths.get(pathUid);
+								Path dest2 = Paths.get(pathUidH + fileDate + fileExt);
 
 								if (Files.exists(source2)) {
 									Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 								}
 
-								File file2 = new File("C:\\JAR-programs\\Documents\\authuserid2.txt");
+								File file2 = new File(pathUid);
 
 								FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 								BufferedWriter bw2 = new BufferedWriter(fw2);
@@ -1341,7 +1361,6 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().repaint();
 				}
 				if (selCmb.contentEquals("Write to File")) {
-
 					getMidRightPanel().removeAll();
 					getMidRightPanel().revalidate();
 					getMidRightPanel().repaint();
@@ -1355,21 +1374,26 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().revalidate();
 					getMidLeftTopPanel().repaint();
 					boolean existsToWrite = true;
+					
+					dateTime = LocalDateTime.now();
+					dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy-HHmmss");
+					fileDate = dateTime.format(dateFormatter);
 
 					if (existsToWrite) {
+						
 						try {
-							Path source1 = Paths.get("C:\\JAR-programs\\Documents\\authuser2.txt");
-							Path dest1 = Paths.get("C:\\JAR-programs\\Documents\\backup\\authuser2-history.txt");
-							Path source2 = Paths.get("C:\\JAR-programs\\Documents\\authuserid2.txt");
-							Path dest2 = Paths.get("C:\\JAR-programs\\Documents\\backup\\authuserid2-history.txt");
+							Path source1 = Paths.get(pathUsr);
+							Path dest1 = Paths.get(pathUsrH + fileDate + fileExt);
+							Path source2 = Paths.get(pathUid);
+							Path dest2 = Paths.get(pathUidH + fileDate + fileExt);
 
 							if (Files.exists(source1) || Files.exists(source2)) {
 								Files.copy(source1, dest1, StandardCopyOption.REPLACE_EXISTING);
 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
 
-							File file1 = new File("C:\\JAR-programs\\Documents\\authuser2.txt");
-							File file2 = new File("C:\\JAR-programs\\Documents\\authuserid2.txt");
+							File file1 = new File(pathUsr);
+							File file2 = new File(pathUid);
 
 							FileWriter fw1 = new FileWriter(file1.getAbsoluteFile());
 							BufferedWriter bw1 = new BufferedWriter(fw1);
@@ -1433,6 +1457,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							fw1.close();
 							fw2.close();
 							JOptionPane.showMessageDialog(null, "Data Exported");
+							getLog().info("Data written to files");
 //							inputCode = null;
 							/*
 							 * Cleaning History user files
@@ -1441,8 +1466,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							ArrayList<FileBank> filesUsr = new ArrayList<>();
 							filesUsr.clear();
 
-							File tmp1 = new File("C:/JAR-programs/Documents/backup");
-							FilenameFilter filter1 = (file, s) -> s.startsWith("authuser2-history");
+							File tmp1 = new File(backup);
+							FilenameFilter filter1 = (file, s) -> s.startsWith(fileUsr);
 							File[] list1 = tmp1.listFiles(filter1);
 
 							if (list1 != null) {
@@ -1456,6 +1481,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								for (int i = 0; i < (filesUsr.size() - 10); i++) {
 									delUsrF = new File(filesUsr.get(i).getFiles());
 									delUsrF.delete();
+									getLog().info("file :" + delUsrF + " deleted");
 
 								}
 							}
@@ -1466,8 +1492,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							ArrayList<FileBank> filesUid = new ArrayList<>();
 							filesUid.clear();
 
-							File tmp2 = new File("C:/JAR-programs/Documents/backup");
-							FilenameFilter filter2 = (file, s) -> s.startsWith("authuserid2-history");
+							File tmp2 = new File(backup);
+							FilenameFilter filter2 = (file, s) -> s.startsWith(fileUid);
 							File[] list2 = tmp2.listFiles(filter2);
 
 							if (list2 != null) {
@@ -1481,6 +1507,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								for (int i = 0; i < (filesUid.size() - 10); i++) {
 									delUidF = new File(filesUid.get(i).getFiles());
 									delUidF.delete();
+									getLog().info("file :" + delUidF + " deleted");
 								}
 							}
 
@@ -1489,7 +1516,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						}
 
 					}
-
+					return;	
 				}
 				if (selCmb.contentEquals("Read from File")) {
 					getMidRightPanel().removeAll();
@@ -1509,9 +1536,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					userIdData.clear();
 					try {
 						BufferedReader br1 = new BufferedReader(
-								new FileReader("C:\\JAR-programs\\Documents\\authuserid2.txt"));
+								new FileReader(pathUid));
 						BufferedReader br2 = new BufferedReader(
-								new FileReader("C:\\JAR-programs\\Documents\\authuser2.txt"));
+								new FileReader(pathUsr));
 						String line1;
 						String line2;
 
@@ -1555,6 +1582,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						e1.printStackTrace();
 					}
 					JOptionPane.showMessageDialog(null, "Data Imported");
+					getLog().info("Data read from the file");
 
 				}
 				break;
@@ -1654,14 +1682,14 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							/*
 							 * write to file after password change
 							 */
-							Path source2 = Paths.get("C:\\JAR-programs\\Documents\\authuserid2.txt");
-							Path dest2 = Paths.get("C:\\JAR-programs\\Documents\\backup\\authuserid2-history.txt");
+							Path source2 = Paths.get(pathUid);
+							Path dest2 = Paths.get(pathUidH + fileDate + fileExt);
 
 							if (Files.exists(source2)) {
 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
 
-							File file2 = new File("C:\\JAR-programs\\Documents\\authuserid2.txt");
+							File file2 = new File(pathUid);
 
 							FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 							BufferedWriter bw2 = new BufferedWriter(fw2);
@@ -1760,24 +1788,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		AuthorizationManager2.midRightPanel = midRightPanel;
 	}
 
-	public static Connection getConn() {
-		return conn;
-	}
-
 	public static Logger getLog() {
 		return log;
 	}
 
 	public static void setLog(Logger log) {
 		AuthorizationManager2.log = log;
-	}
-
-	public static Statement getStmt() {
-		return stmt;
-	}
-
-	public static void setStmt(Statement stmt) {
-		AuthorizationManager2.stmt = stmt;
 	}
 
 	public static JScrollPane getJsp() {
