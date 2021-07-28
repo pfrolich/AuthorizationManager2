@@ -70,9 +70,9 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	private int mthNow = date.getMonthValue();
 	private int dayNow = date.getDayOfMonth();
 
-	private Font fontBttn = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font title = new Font("Arial", Font.BOLD, 24);
-	private Font fontTxt = new Font("Arial", Font.BOLD, 18);
+	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
+	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
+	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
 
 	public static Color blue1 = new Color(173, 193, 235);
 	public static Color vlblue = new Color(235, 235, 250);
@@ -167,7 +167,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		JLabel titleInsert = new JLabel("Add New User");
 		titleInsert.setForeground(vlgreen);
-		titleInsert.setFont(title);
+		titleInsert.setFont(font24Ar);
 
 		topPanel.add(titleInsert);
 
@@ -188,7 +188,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		for (int i = 0; i < 8; i++) {
 			label = new JLabel(labelText[i]);
-			label.setFont(fontTxt);
+			label.setFont(font18Ar);
 			label.setForeground(greend1);
 			midLPanel.add(label);
 		}
@@ -217,7 +217,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		inpId = new JTextField(5);
 		inpId.setBackground(Color.white);
-		inpId.setFont(fontTxt);
+		inpId.setFont(font18Ar);
 		inpId.setEditable(false);
 
 		id.add(emptyI);
@@ -235,7 +235,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		inpName = new JTextField(23);
 		inpName.setBackground(Color.white);
-		inpName.setFont(fontTxt);
+		inpName.setFont(font18Ar);
 		inpName.setCursor(getCursor());
 
 		name.add(emptyN);
@@ -252,7 +252,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		emptyS.setBackground(vlgreen);
 
 		inpSname = new JTextField(23);
-		inpSname.setFont(fontTxt);
+		inpSname.setFont(font18Ar);
 		inpSname.setBackground(Color.white);
 
 		sname.add(emptyS);
@@ -269,7 +269,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		emptyE.setBackground(vlgreen);
 
 		inpEmail = new JTextField(23);
-		inpEmail.setFont(fontTxt);
+		inpEmail.setFont(font18Ar);
 		inpEmail.setBackground(Color.white);
 
 		email.add(emptyE);
@@ -284,7 +284,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		String cbMth[] = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
 
 		comboYrS = new JComboBox<String>();
-		comboYrS.setFont(fontTxt);
+		comboYrS.setFont(font18Ar);
 
 		for (int i = fromYr; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
@@ -292,10 +292,10 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		}
 
 		comboMthS = new JComboBox<String>(cbMth);
-		comboMthS.setFont(fontTxt);
+		comboMthS.setFont(font18Ar);
 
 		comboDayS = new JComboBox<String>();
-		comboDayS.setFont(fontTxt);
+		comboDayS.setFont(font18Ar);
 
 		for (int i = 1; i < 32; i++) {
 			String itemDay = Integer.toString(i);
@@ -332,7 +332,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		String cbValid[] = { "true", "false" };
 		comboValid = new JComboBox<String>(cbValid);
-		comboValid.setFont(fontTxt);
+		comboValid.setFont(font18Ar);
 
 		valid.add(emptyV);
 		valid.add(comboValid);
@@ -349,13 +349,13 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		inpUserId = new JTextField(10);
 		inpUserId.setBackground(Color.white);
-		inpUserId.setFont(fontTxt);
+		inpUserId.setFont(font18Ar);
 		inpUserId.setEditable(false);
 
 		ok = new JButton("OK");
 		ok.setActionCommand("ok");
 		ok.setPreferredSize(new Dimension(70, 30));
-		ok.setFont(fontBttn);
+		ok.setFont(font18);
 		ok.setForeground(greend1);
 		ok.addActionListener(this);
 
@@ -375,7 +375,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 		inpPwInit = new JPasswordField(10);
 		inpPwInit.setBackground(Color.white);
-		inpPwInit.setFont(fontTxt);
+		inpPwInit.setFont(font18Ar);
 				
 		pwInit.add(emptyP);
 		pwInit.add(inpPwInit);
@@ -406,7 +406,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
 			button.setPreferredSize(new Dimension(100, 40));
-			button.setFont(fontBttn);
+			button.setFont(font18);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midBotPanel.add(button);

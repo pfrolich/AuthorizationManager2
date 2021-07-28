@@ -30,7 +30,7 @@ public class ListScrn extends JPanel {
 	public static JLabel txtName;
 	public static JLabel loggedIn;
 
-	private Font fontTxt = new Font("Arial", Font.BOLD, 24);
+	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
 
 	public static Color blue1 = new Color(173, 193, 235);
 	public static Color vlblue = new Color(235, 235, 250);
@@ -91,7 +91,7 @@ public class ListScrn extends JPanel {
 			titleInsert = (new JLabel("Listing all UserId's"));
 		}
 		titleInsert.setForeground(greend1);
-		titleInsert.setFont(fontTxt);
+		titleInsert.setFont(font24Ar);
 
 		midTopPanel.add(titleInsert);
 

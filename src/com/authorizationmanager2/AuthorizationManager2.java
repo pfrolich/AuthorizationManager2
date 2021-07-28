@@ -147,6 +147,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private static String fileUid;
 	private static String pathLogProp;
 	private static String pathLogFile;
+	private static String dateTimeFormat;
 	
 	private static LocalDateTime dateTime;
 	private static DateTimeFormatter dateFormatter;  
@@ -169,12 +170,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	public static Color vlgreen = new Color(235, 250, 235);
 	public static Color green1 = new Color(46, 184, 46);
 
-	private Font fontBttn = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font fontTabh = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font fontTab = new Font(Font.SANS_SERIF, Font.BOLD, 16);
-	private Font fontLogin = new Font("Arial", Font.BOLD, 24);
-	private Font fontCmb = new Font("Arial", Font.BOLD, 18);
-	private Font fontTxt = new Font("Arial", Font.BOLD, 18);
+	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
+	private Font font16 = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
+	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
 
 	private static Logger log = Logger.getLogger("com.authorizationmanager");
 	private static FileHandler logFile;
@@ -326,6 +325,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					fileUid = properties.getProperty("file-uid-startswith");
 					pathLogProp = properties.getProperty("path-log-properties");
 					pathLogFile = properties.getProperty("path-log-file");
+					dateTimeFormat = properties.getProperty("datetime-format");
 
 					LogManager.getLogManager().readConfiguration(new FileInputStream(pathLogProp));
 					log.setLevel(Level.FINE);
@@ -416,29 +416,29 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		String cbActie[] = { "Add new user", "Update User", "Delete User", "Change options UserId",
 				"Reset UserPassword", "Revoke User", "List Users", "List UserId's", "Write to File", "Read from File" };
 		combo = new JComboBox<String>(cbActie);
-		combo.setFont(fontCmb);
+		combo.setFont(font18Ar);
 		combo.addActionListener(this);
 		combo.setActionCommand("actie");
 
 		setUsrSelect(new JLabel("Select user Pattern:"));
 		getUsrSelect().setForeground(vlgreen);
-		getUsrSelect().setFont(fontTxt);
+		getUsrSelect().setFont(font18Ar);
 		getUsrSelect().setBorder(null);
 
 		String cbUsr[] = { "default", "xspp", "uspp", "xrjp", "urjp" };
 		setCmbUser(new JComboBox<>(cbUsr));
 		getCmbUser().addActionListener(this);
-		getCmbUser().setFont(fontCmb);
+		getCmbUser().setFont(font18Ar);
 		getCmbUser().setActionCommand("usrSel");
 		usrPat = "default";
 
 		iPwdTxt = new JLabel("new Password : ");
 		iPwdTxt.setForeground(vlgreen);
-		iPwdTxt.setFont(fontTxt);
+		iPwdTxt.setFont(font18Ar);
 		iPwdTxt.setBorder(null);
 
 		iPwdInp = new JPasswordField(12);
-		iPwdInp.setFont(fontTxt);
+		iPwdInp.setFont(font18Ar);
 		iPwdInp.setBackground(Color.white);
 
 		setEmpty2(new JTextArea(8, 20));
@@ -450,36 +450,36 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		empty3.setBackground(greend1);
 
 		userText = new JLabel();
-		userText.setFont(fontTxt);
+		userText.setFont(font18Ar);
 
 		userId = new JTextField(12);
-		userId.setFont(fontTxt);
+		userId.setFont(font18Ar);
 		userId.setBackground(Color.white);
 
 		ok = new JButton("OK");
 		ok.setPreferredSize(new Dimension(80, 40));
-		ok.setFont(fontBttn);
+		ok.setFont(font18);
 		ok.setForeground(greend1);
 		ok.addActionListener(this);
 		ok.setActionCommand("ok");
 
 		ok1 = new JButton("OK");
 		ok1.setPreferredSize(new Dimension(80, 40));
-		ok1.setFont(fontBttn);
+		ok1.setFont(font18);
 		ok1.setForeground(greend1);
 		ok1.addActionListener(this);
 		ok1.setActionCommand("ok1");
 
 		ok2 = new JButton("OK");
 		ok2.setPreferredSize(new Dimension(80, 40));
-		ok2.setFont(fontBttn);
+		ok2.setFont(font18);
 		ok2.setForeground(greend1);
 		ok2.addActionListener(this);
 		ok2.setActionCommand("ok2");
 
 		back = new JButton("Back");
 		back.setPreferredSize(new Dimension(100, 50));
-		back.setFont(fontBttn);
+		back.setFont(font18);
 		back.setForeground(greend1);
 		back.addActionListener(this);
 		back.setActionCommand("back");
@@ -502,7 +502,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
 			button.setPreferredSize(new Dimension(100, 50));
-			button.setFont(fontBttn);
+			button.setFont(font18);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midLeftBotPanel.add(button);
@@ -568,12 +568,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 		lgnName = new JLabel("User :");
 		lgnName.setForeground(vlgreen);
-		lgnName.setFont(fontLogin);
+		lgnName.setFont(font24Ar);
 		lgnName.setBorder(null);
 
 		password = new JLabel("Password :");
 		password.setForeground(vlgreen);
-		password.setFont(fontLogin);
+		password.setFont(font24Ar);
 		password.setBorder(null);
 
 		loginPanelL.add(empty);
@@ -594,12 +594,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		empty.setBackground(greend1);
 
 		inputName = new JTextField(11);
-		inputName.setFont(fontLogin);
+		inputName.setFont(font24Ar);
 		inputName.addActionListener(this);
 		inputName.setActionCommand("enter");
 
 		inputPassword = new JPasswordField(11);
-		inputPassword.setFont(fontLogin);
+		inputPassword.setFont(font24Ar);
 		inputPassword.addActionListener(this);
 		inputPassword.setActionCommand("enter");
 
@@ -611,7 +611,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		enter = new JButton("Enter");
 		enter.setPreferredSize(new Dimension(100, 40));
 		enter.setActionCommand("enter");
-		enter.setFont(fontBttn);
+		enter.setFont(font18);
 		enter.addActionListener(this);
 
 		loginPanelR.add(empty);
@@ -647,17 +647,17 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 		oldPw = new JLabel("Password old :");
 		oldPw.setForeground(vlgreen);
-		oldPw.setFont(fontLogin);
+		oldPw.setFont(font24Ar);
 		oldPw.setBorder(null);
 
 		pwdNew1 = new JLabel("Password new :");
 		pwdNew1.setForeground(vlgreen);
-		pwdNew1.setFont(fontLogin);
+		pwdNew1.setFont(font24Ar);
 		pwdNew1.setBorder(null);
 
 		pwdNew2 = new JLabel("Confirm password new :");
 		pwdNew2.setForeground(vlgreen);
-		pwdNew2.setFont(fontLogin);
+		pwdNew2.setFont(font24Ar);
 		pwdNew2.setBorder(null);
 
 		chgPwdPanelL.add(empty);
@@ -679,17 +679,17 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		chgPwdPanelR.setBackground(greend1);
 
 		inpOldPw = new JPasswordField(11);
-		inpOldPw.setFont(fontLogin);
+		inpOldPw.setFont(font24Ar);
 		inpOldPw.addActionListener(this);
 		inpOldPw.setActionCommand("enter2");
 
 		inpPwdNew1 = new JPasswordField(11);
-		inpPwdNew1.setFont(fontLogin);
+		inpPwdNew1.setFont(font24Ar);
 		inpPwdNew1.addActionListener(this);
 		inpPwdNew1.setActionCommand("enter2");
 
 		inpPwdNew2 = new JPasswordField(11);
-		inpPwdNew2.setFont(fontLogin);
+		inpPwdNew2.setFont(font24Ar);
 		inpPwdNew2.addActionListener(this);
 		inpPwdNew2.setActionCommand("enter2");
 
@@ -701,7 +701,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		enter2 = new JButton("Enter");
 		enter2.setPreferredSize(new Dimension(100, 40));
 		enter2.setActionCommand("enter2");
-		enter2.setFont(fontBttn);
+		enter2.setFont(font18);
 		enter2.addActionListener(this);
 
 		chgPwdPanelR.add(empty);
@@ -795,10 +795,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 				}
 				if (exists1 && exists2) {
 					try {
-						BufferedReader br1 = new BufferedReader(
-								new FileReader(pathUid));
-						BufferedReader br2 = new BufferedReader(
-								new FileReader(pathUsr));
+						BufferedReader br1 = new BufferedReader(new FileReader(pathUid));
+						BufferedReader br2 = new BufferedReader(new FileReader(pathUsr));
 						String line1;
 						String line2;
 						userIdData.clear();
@@ -938,7 +936,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			break;
 
 		/*
-		 * case Enter2: used for change password if initieel password is welkom
+		 * case Enter2: used for change password if initial password 
 		 */
 		case "enter2":
 
@@ -963,7 +961,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 			try {
 				dateTime = LocalDateTime.now();
-				dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy-HHmmss");
+				dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 				fileDate = dateTime.format(dateFormatter);
 				for (int i = 0; i < userIdData.size(); i++) {
 					if (userIdData.get(i).getUser().equals(loginName)) {
@@ -1244,8 +1242,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					table1.setBackground(vlgreen);
 					table1.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 					table1.getTableHeader().setBackground(vlgreen);
-					table1.getTableHeader().setFont(fontTabh);
-					table1.setFont(fontTab);
+					table1.getTableHeader().setFont(font18);
+					table1.setFont(font16);
 					table1.setEnabled(false);
 					table1.setPreferredScrollableViewportSize(new Dimension(676, 428));
 
@@ -1303,8 +1301,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					table2.setBackground(vlgreen);
 					table2.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 					table2.getTableHeader().setBackground(vlgreen);
-					table2.getTableHeader().setFont(fontTabh);
-					table2.setFont(fontTab);
+					table2.getTableHeader().setFont(font18);
+					table2.setFont(font16);
 					table2.setEnabled(false);
 					table2.setPreferredScrollableViewportSize(new Dimension(676, 428));
 
@@ -1376,7 +1374,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					boolean existsToWrite = true;
 					
 					dateTime = LocalDateTime.now();
-					dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy-HHmmss");
+					dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 					fileDate = dateTime.format(dateFormatter);
 
 					if (existsToWrite) {

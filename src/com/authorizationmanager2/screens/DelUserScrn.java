@@ -56,9 +56,9 @@ public class DelUserScrn extends JPanel implements ActionListener {
 	private int mthNow = date.getMonthValue();
 	private int dayNow = date.getDayOfMonth();
 
-	private Font fontBttn = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font title = new Font("Arial", Font.BOLD, 24);
-	private Font fontTxt = new Font("Arial", Font.BOLD, 18);
+	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
+	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
+	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
 
 	public static Color blue1 = new Color(173, 193, 235);
 	public static Color vlblue = new Color(235, 235, 250);
@@ -116,7 +116,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 
 		JLabel titleInsert = new JLabel("Delete User");
 		titleInsert.setForeground(vlgreen);
-		titleInsert.setFont(title);
+		titleInsert.setFont(font24Ar);
 
 		topPanel.add(titleInsert);
 
@@ -137,7 +137,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 
 		for (int i = 0; i < 6; i++) {
 			label = new JLabel(labelText[i]);
-			label.setFont(fontBttn);
+			label.setFont(font18);
 			label.setForeground(greend1);
 			midLPanel.add(label);
 		}
@@ -166,7 +166,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 
 		inpId = new JTextField(5);
 		inpId.setBackground(Color.white);
-		inpId.setFont(fontTxt);
+		inpId.setFont(font18Ar);
 		inpId.addActionListener(this);
 		inpId.setActionCommand("id");
 		inpId.addKeyListener(new KeyAdapter() {
@@ -202,7 +202,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 		emptyN.setBackground(vlgreen);
 
 		inpFname = new JTextField(23);
-		inpFname.setFont(fontTxt);
+		inpFname.setFont(font18Ar);
 		inpFname.setBackground(Color.white);
 
 		name.add(emptyN);
@@ -219,7 +219,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 		emptyS.setBackground(vlgreen);
 
 		inpSname = new JTextField(23);
-		inpSname.setFont(fontTxt);
+		inpSname.setFont(font18Ar);
 		inpSname.setBackground(Color.white);
 
 		sname.add(emptyS);
@@ -236,7 +236,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 		emptyE.setBackground(vlgreen);
 
 		inpEmail = new JTextField(23);
-		inpEmail.setFont(fontTxt);
+		inpEmail.setFont(font18Ar);
 		inpEmail.setBackground(Color.white);
 
 		email.add(emptyE);
@@ -251,7 +251,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 		String cbMth[] = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
 
 		comboYrS = new JComboBox<String>();
-		comboYrS.setFont(fontTxt);
+		comboYrS.setFont(font18Ar);
 
 		for (int i = fromYr; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
@@ -259,10 +259,10 @@ public class DelUserScrn extends JPanel implements ActionListener {
 		}
 
 		comboMthS = new JComboBox<String>(cbMth);
-		comboMthS.setFont(fontTxt);
+		comboMthS.setFont(font18Ar);
 
 		comboDayS = new JComboBox<String>();
-		comboDayS.setFont(fontTxt);
+		comboDayS.setFont(font18Ar);
 		for (int i = 1; i < 32; i++) {
 			String itemDay = Integer.toString(i);
 
@@ -298,7 +298,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 
 		String cbValid[] = { "true", "false" };
 		comboValid = new JComboBox<String>(cbValid);
-		comboValid.setFont(fontTxt);
+		comboValid.setFont(font18Ar);
 
 		valid.add(emptyV);
 		valid.add(comboValid);
@@ -327,7 +327,7 @@ public class DelUserScrn extends JPanel implements ActionListener {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
 			button.setPreferredSize(new Dimension(100, 30));
-			button.setFont(fontBttn);
+			button.setFont(font18);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midBotPanel.add(button);

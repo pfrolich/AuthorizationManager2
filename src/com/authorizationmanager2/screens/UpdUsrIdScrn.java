@@ -64,9 +64,9 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	private int mthNow;
 	private int dayNow;
 
-	private Font fontBttn = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font title = new Font("Arial", Font.BOLD, 24);
-	private Font fontTxt = new Font("Arial", Font.BOLD, 18);
+	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
+	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
+	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
 
 	public static Color blue1 = new Color(173, 193, 235);
 	public static Color vlblue = new Color(235, 235, 250);
@@ -124,7 +124,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		JLabel titleInsert = new JLabel("Update  UserId's");
 		titleInsert.setForeground(vlgreen);
-		titleInsert.setFont(title);
+		titleInsert.setFont(font24Ar);
 
 		topPanel.add(titleInsert);
 
@@ -145,7 +145,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		for (int i = 0; i < 8; i++) {
 			label = new JLabel(labelText[i]);
-			label.setFont(fontBttn);
+			label.setFont(font18);
 			label.setForeground(greend1);
 			midLPanel.add(label);
 		}
@@ -174,7 +174,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		inpId = new JTextField(5);
 		inpId.setBackground(Color.white);
-		inpId.setFont(fontTxt);
+		inpId.setFont(font18Ar);
 		inpId.addActionListener(this);
 		inpId.setActionCommand("id");
 		inpId.addKeyListener(new KeyAdapter() {
@@ -211,7 +211,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		inpUser = new JTextField(23);
 		inpUser.setBackground(Color.white);
-		inpUser.setFont(fontTxt);
+		inpUser.setFont(font18Ar);
 		inpUser.addActionListener(this);
 		inpUser.setActionCommand("user");
 
@@ -231,7 +231,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		String cbMth[] = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
 
 		comboYrS = new JComboBox<String>();
-		comboYrS.setFont(fontTxt);
+		comboYrS.setFont(font18Ar);
 
 		for (int i = fromYr; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
@@ -239,10 +239,10 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		}
 
 		comboMthS = new JComboBox<String>(cbMth);
-		comboMthS.setFont(fontTxt);
+		comboMthS.setFont(font18Ar);
 
 		comboDayS = new JComboBox<String>();
-		comboDayS.setFont(fontTxt);
+		comboDayS.setFont(font18Ar);
 
 		for (int i = 1; i < 32; i++) {
 			String itemDay = Integer.toString(i);
@@ -251,7 +251,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		}
 
 		comboYrE = new JComboBox<String>();
-		comboYrE.setFont(fontTxt);
+		comboYrE.setFont(font18Ar);
 		comboYrE.addItem("9999");
 
 		for (int i = fromYr; i < toYr; i++) {
@@ -260,10 +260,10 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		}
 
 		comboMthE = new JComboBox<String>(cbMth);
-		comboMthE.setFont(fontTxt);
+		comboMthE.setFont(font18Ar);
 
 		comboDayE = new JComboBox<String>();
-		comboDayE.setFont(fontTxt);
+		comboDayE.setFont(font18Ar);
 
 		for (int i = 31; i > 0; i--) {
 			String itemDay = Integer.toString(i);
@@ -315,7 +315,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		String cbValid[] = { "true", "false" };
 		comboValid = new JComboBox<String>(cbValid);
-		comboValid.setFont(fontTxt);
+		comboValid.setFont(font18Ar);
 
 		valid.add(emptyV);
 		valid.add(comboValid);
@@ -332,7 +332,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		String cbBlock[] = { "true", "false" };
 		comboBlock = new JComboBox<String>(cbBlock);
-		comboBlock.setFont(fontTxt);
+		comboBlock.setFont(font18Ar);
 
 		block.add(emptyB);
 		block.add(comboBlock);
@@ -349,7 +349,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 		String cbLvl[] = { "1", "2" };
 		comboLvl = new JComboBox<String>(cbLvl);
-		comboLvl.setFont(fontTxt);
+		comboLvl.setFont(font18Ar);
 
 		lvl.add(emptyL);
 		lvl.add(comboLvl);
@@ -380,7 +380,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
 			button.setPreferredSize(new Dimension(100, 30));
-			button.setFont(fontBttn);
+			button.setFont(font18);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midBotPanel.add(button);
