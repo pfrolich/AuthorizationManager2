@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -997,8 +998,10 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								if (Files.exists(source2)) {
 									Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 								}
-
+								Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
+								
 								File file2 = new File(pathUid);
+								file2.setWritable(true);
 
 								FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 								BufferedWriter bw2 = new BufferedWriter(fw2);
@@ -1037,6 +1040,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								bw2.close();
 								// close FileWriter
 								fw2.close();
+								
+								Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+								file2.setReadOnly();
 								/*
 								 * end write to file
 								 */
@@ -1389,9 +1395,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								Files.copy(source1, dest1, StandardCopyOption.REPLACE_EXISTING);
 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
-
+							
 							File file1 = new File(pathUsr);
 							File file2 = new File(pathUid);
+							file1.setWritable(true);
+							Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
+							file2.setWritable(true);
 
 							FileWriter fw1 = new FileWriter(file1.getAbsoluteFile());
 							BufferedWriter bw1 = new BufferedWriter(fw1);
@@ -1454,6 +1463,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							// close FileWriter
 							fw1.close();
 							fw2.close();
+							
+							file1.setReadOnly();
+							file2.setReadOnly();
+							Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+							
 							JOptionPane.showMessageDialog(null, "Data Exported");
 							getLog().info("Data written to files");
 //							inputCode = null;
@@ -1686,11 +1700,16 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							if (Files.exists(source2)) {
 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
-
+							
 							File file2 = new File(pathUid);
+							Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
+							file2.setWritable(true);
 
 							FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 							BufferedWriter bw2 = new BufferedWriter(fw2);
+							
+							Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+							file2.setReadOnly();
 
 							String col0;
 							String col1;
