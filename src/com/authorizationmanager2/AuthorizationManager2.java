@@ -1663,6 +1663,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			inpUser = userId.getText();
 			iPwdNew = iPwdInp.getPassword();
 			inpIPw = String.valueOf(iPwdNew);
+			dateTime = LocalDateTime.now();
+			dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
+			fileDate = dateTime.format(dateFormatter);
 
 			existToReset = false;
 
@@ -1682,35 +1685,27 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							newPwd2 = encrypt(inpIPw.getBytes(UTF_8), eCode);
 							String sdate = userIdData.get(i).getsDate();
 							String edate = userIdData.get(i).getmDate();
-							Boolean val = false;
+							Boolean val = true;
 							Boolean blk = userIdData.get(i).getBlock();
 							String level = userIdData.get(i).getLvl();
 							String pwStat = "i";
 							AuthorizationManager2.userIdData.set(i,
 									new DataUserId(authId, user, newPwd2, sdate, edate, val, blk, level, pwStat));
-
 							AuthorizationManager2.getLog().info("userid: " + user + " resetted");
-							System.out.println(newPwd2);
 							/*
 							 * write to file after password change
 							 */
 							Path source2 = Paths.get(pathUid);
 							Path dest2 = Paths.get(pathUidH + fileDate + fileExt);
-
-							if (Files.exists(source2)) {
-								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
-							}
-							
+ 							if (Files.exists(source2)) {
+ 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
+ 							}
 							File file2 = new File(pathUid);
 							Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
 							file2.setWritable(true);
-
 							FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 							BufferedWriter bw2 = new BufferedWriter(fw2);
 							
-							Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
-							file2.setReadOnly();
-
 							String col0;
 							String col1;
 							String col2;
@@ -1740,6 +1735,9 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 									bw2.write("\n");
 								}
 							}
+							Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+							file2.setReadOnly();
+
 							getLog().info("File authuserid2 has changed");
 							// close BufferedWriter
 							bw2.close();
