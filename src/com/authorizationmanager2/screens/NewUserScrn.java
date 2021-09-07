@@ -25,9 +25,14 @@ import com.authorizationmanager2.AuthorizationManager2;
 import com.authorizationmanager2.CryptoUtils;
 import com.authorizationmanager2.data.DataUser;
 import com.authorizationmanager2.data.DataUserId;
+import com.authorizationmanager2.tabbedpane.Console;
 
 public class NewUserScrn extends JPanel implements ActionListener {
-
+	/*
+	 * Full screen definitions
+	 */
+	public static int w;
+	public static int h;
 	/**
 	 * Definitions: Panels, Buttons, ComboBoxes, TextAreas, TextFields, Labels,
 	 * etc...
@@ -38,59 +43,86 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	private JPanel midPanel;
 	private JPanel midLPanel;
 	private JPanel midRPanel;
+	private JPanel midRTopPanel;
+	private JPanel midRBotPanel;
 	private JPanel midBotPanel;
 	private JPanel topPanel;
+	private JPanel bar;
 
+	/*
+	 * definitions midLpanel
+	 */
 	private JLabel label;
+	private JProgressBar progressBar;
+	/*
+	 * definitions midRpanel
+	 */
+	private static JTextField inpName;
+	private static JTextField inpSname;
+	private static JTextField inpEmail;
+	private static JTextField inpId;
+	private static JTextField inpUserId;
 
-	private JTextField inpName;
-	private JTextField inpSname;
-	private JTextField inpEmail;
-	private JTextField inpId;
-	private JTextField inpUserId;
-	
-	private JPasswordField inpPwInit;
+	private static JPasswordField inpPwInit;
 
 	private JButton button;
 	private JButton ok;
 
+	/*
+	 * definitions for create user & userid
+	 */
 	private String insNm;
 	private String insSnm;
 	private String insEmail;
 	private String insSdate;
-	private int selId;
-	private boolean checkS = false;
 
-	private JComboBox<String> comboValid;
-	private JComboBox<String> comboYrS;
-	private JComboBox<String> comboMthS;
-	private JComboBox<String> comboDayS;
+	public static String usrPat;
+	public static boolean checkS = false;
+	private boolean exists = false;
+	private Boolean block1 = false;
+
+	private char[] getPwdI;
+	private String selPwdI;
+
+	private String selValid;
+	private String selValid1;
+	private Boolean val1;
+
+	private String selLvl;
+	private String selPwStat;
+	private int selId;
+	private String newId;
+	private String newPwd;
+	private String userid;
+	private String useridN;
+
+	/*
+	 * date /time definitions
+	 */
+	private static Timer timer;
+
+	public static JComboBox<String> comboValid;
+	public static JComboBox<String> comboYrS;
+	public static JComboBox<String> comboMthS;
+	public static JComboBox<String> comboDayS;
 
 	private LocalDate date = LocalDate.now();
-	private int mthNow = date.getMonthValue();
-	private int dayNow = date.getDayOfMonth();
+	private String yrNow = Integer.toString(date.getYear());
 
-	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
-	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
+	private String selYrS;
+	private String selMthS;
+	private String selDayS;
 
-	public static Color blue1 = new Color(173, 193, 235);
-	public static Color vlblue = new Color(235, 235, 250);
-	public static Color blue2 = new Color(179, 198, 255);
-	public static Color blue = new Color(0, 60, 179);
-	public static Color blued4 = new Color(0, 60, 179);
-	public static Color blued2 = new Color(0, 34, 102);
-	public static Color blued3 = new Color(20, 20, 82);
-	public static Color blued1 = new Color(0, 43, 128);
+	private String insEdate;
 
+	/*
+	 * color definitions
+	 */
+	public static Color red1 = new Color(230, 204, 204);
+	public static Color red2 = new Color(204, 0, 0);
 	public static Color greend1 = new Color(26, 51, 0);
-	public static Color greend2 = new Color(40, 77, 0);
-	public static Color greend3 = new Color(0, 43, 128);
-	public static Color greend4 = new Color(0, 43, 128);
 	public static Color vlgreen = new Color(235, 250, 235);
 	public static Color green1 = new Color(46, 184, 46);
-
-	Thread thread1;
 
 	// encryption/decryption
 	private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
@@ -130,8 +162,10 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	}
 
 	public NewUserScrn() {
+		w = AuthorizationManager2.scrW;
+		h = AuthorizationManager2.scrH;
 		newPanel = new JPanel();
-		newPanel.setPreferredSize(new Dimension(700, 580));
+		newPanel.setPreferredSize(new Dimension((int) (w * 0.55), (int) (h * 0.78)));
 		newPanel.setLayout(new GridLayout());
 		newPanel.setBackground(vlgreen);
 		newPanel.setVisible(true);
@@ -144,9 +178,9 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	 */
 	private Component midPanel() {
 		midPanel = new JPanel();
-		midPanel.setPreferredSize(new Dimension(700, 560));
+		midPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.75)));
 		midPanel.setLayout(new FlowLayout());
-		midPanel.setBackground(vlgreen);
+		midPanel.setBackground(greend1);
 
 		midPanel.add(topPanel());
 		midPanel.add(midLPanel());
@@ -161,13 +195,13 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	 */
 	private Component topPanel() {
 		topPanel = new JPanel();
-		topPanel.setPreferredSize(new Dimension(660, 50));
+		topPanel.setPreferredSize(new Dimension((int) (w * 0.55), (int) (h * 0.07)));
 		topPanel.setLayout(new FlowLayout());
 		topPanel.setBackground(greend1);
 
 		JLabel titleInsert = new JLabel("Add New User");
 		titleInsert.setForeground(vlgreen);
-		titleInsert.setFont(font24Ar);
+		titleInsert.setFont(AuthorizationManager2.font24);
 
 		topPanel.add(titleInsert);
 
@@ -178,226 +212,260 @@ public class NewUserScrn extends JPanel implements ActionListener {
 	 * midLPanel part of midPanel -- Text labels
 	 */
 	private Component midLPanel() {
+		int x10 = (int) Math.round(w * 0.008);
 		midLPanel = new JPanel();
-		midLPanel.setPreferredSize(new Dimension(180, 440));
+		midLPanel.setPreferredSize(new Dimension((int) (w * 0.14), (int) (h * 0.61)));
 		midLPanel.setLayout(new GridLayout(10, 1));
 		midLPanel.setBackground(vlgreen);
 
-		String[] labelText = { "new Id :", "Name :", "Surname :", "Email-address :", "Start-date :", "Valid :",
-				"Create userid :", "Init Password : " };
+		bar = new JPanel();
+		bar.setPreferredSize(new Dimension((int) (w * 0.14), (int) (h * 0.044)));
+		bar.setBackground(vlgreen);
+		bar.setLayout(new FlowLayout(0, x10, 0));
 
-		for (int i = 0; i < 8; i++) {
+		progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+		progressBar.setBackground(vlgreen);
+		progressBar.setForeground(greend1);
+		progressBar.setBorder(AuthorizationManager2.border);
+
+		bar.add(progressBar);
+
+		String[] labelText = { "  new Id :", "  Name :", "  Surname :", "  Email-address :", "  Start-date :",
+				"  Valid :", "  Create userid :", "  Init Password : ", " " };
+
+		for (int i = 0; i < 9; i++) {
 			label = new JLabel(labelText[i]);
-			label.setFont(font18Ar);
+			label.setFont(AuthorizationManager2.font18);
 			label.setForeground(greend1);
+
 			midLPanel.add(label);
 		}
-
+		midLPanel.add(bar);
 		return midLPanel;
 	}
 
 	/*
-	 * MidRPanel part of midPanel -- Input textfield
+	 * midRPanel part of midPanel -- contains midRTopPanel & midRBotPanel
 	 */
 	private Component midRPanel() {
 		midRPanel = new JPanel();
-		midRPanel.setPreferredSize(new Dimension(420, 440));
-		midRPanel.setLayout(new GridLayout(10, 1));
+		midRPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.61)));
+		midRPanel.setLayout(new FlowLayout());
 		midRPanel.setBackground(vlgreen);
 
+		midRPanel.add(midRTopPanel());
+		midRPanel.add(midRBotPanel());
+
+		return midRPanel;
+	}
+
+	/*
+	 * midRTopPanel part of midRPanel -- Input textfield
+	 */
+	private Component midRTopPanel() {
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int tf23 = (int) Math.round(w * 0.018);
+		int tf5 = (int) Math.round(w * 0.004);
+		int tf10 = (int) Math.round(w * 0.008);
+		int e70 = (int) Math.round(w * 0.055);
+		int e30 = (int) Math.round(h * 0.042);
+		midRTopPanel = new JPanel();
+		midRTopPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.51)));
+		midRTopPanel.setLayout(new GridLayout(8, 1));
+		midRTopPanel.setBackground(vlgreen);
+
 		JPanel id = new JPanel();
-		id.setPreferredSize(new Dimension(420, 40));
+		id.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		id.setBackground(vlgreen);
-		id.setLayout(new FlowLayout(0, 10, 0));
+		id.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyI = new JTextField(30);
-		emptyI.setBorder(null);
-		emptyI.setEditable(false);
-		emptyI.setBackground(vlgreen);
+		setInpId(new JTextField(tf5));
+		getInpId().setBackground(Color.white);
+		getInpId().setFont(AuthorizationManager2.font18);
+		getInpId().setBorder(AuthorizationManager2.border);
+		getInpId().setEditable(false);
+		getInpId().setDisabledTextColor(greend1);
 
-		inpId = new JTextField(5);
-		inpId.setBackground(Color.white);
-		inpId.setFont(font18Ar);
-		inpId.setEditable(false);
-
-		id.add(emptyI);
-		id.add(inpId);
+		id.add(getInpId());
 
 		JPanel name = new JPanel();
-		name.setPreferredSize(new Dimension(420, 40));
+		name.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		name.setBackground(vlgreen);
-		name.setLayout(new FlowLayout(0, 10, 0));
+		name.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyN = new JTextField(25);
-		emptyN.setBorder(null);
-		emptyN.setEditable(false);
-		emptyN.setBackground(vlgreen);
+		setInpName(new JTextField(tf23));
+		getInpName().setFont(AuthorizationManager2.font18);
+		getInpName().setBackground(Color.white);
+		getInpName().setForeground(greend1);
+		getInpName().setBorder(AuthorizationManager2.border);
+		getInpName().setCursor(getCursor());
 
-		inpName = new JTextField(23);
-		inpName.setBackground(Color.white);
-		inpName.setFont(font18Ar);
-		inpName.setCursor(getCursor());
-
-		name.add(emptyN);
-		name.add(inpName);
+		name.add(getInpName());
 
 		JPanel sname = new JPanel();
-		sname.setPreferredSize(new Dimension(420, 40));
+		sname.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		sname.setBackground(vlgreen);
-		sname.setLayout(new FlowLayout(0, 10, 0));
+		sname.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyS = new JTextField(25);
-		emptyS.setBorder(null);
-		emptyS.setEditable(false);
-		emptyS.setBackground(vlgreen);
+		setInpSname(new JTextField(tf23));
+		getInpSname().setFont(AuthorizationManager2.font18);
+		getInpSname().setBackground(Color.white);
+		getInpSname().setForeground(greend1);
+		getInpSname().setBorder(AuthorizationManager2.border);
 
-		inpSname = new JTextField(23);
-		inpSname.setFont(font18Ar);
-		inpSname.setBackground(Color.white);
-
-		sname.add(emptyS);
-		sname.add(inpSname);
+		sname.add(getInpSname());
 
 		JPanel email = new JPanel();
-		email.setPreferredSize(new Dimension(420, 40));
+		email.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		email.setBackground(vlgreen);
-		email.setLayout(new FlowLayout(0, 10, 0));
+		email.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyE = new JTextField(30);
-		emptyE.setBorder(null);
-		emptyE.setEditable(false);
-		emptyE.setBackground(vlgreen);
+		setInpEmail(new JTextField(tf23));
+		getInpEmail().setFont(AuthorizationManager2.font18);
+		getInpEmail().setBackground(Color.white);
+		getInpEmail().setForeground(greend1);
+		getInpEmail().setBorder(AuthorizationManager2.border);
 
-		inpEmail = new JTextField(23);
-		inpEmail.setFont(font18Ar);
-		inpEmail.setBackground(Color.white);
-
-		email.add(emptyE);
-		email.add(inpEmail);
+		email.add(getInpEmail());
 
 		LocalDate date = LocalDate.now();
-		int fromYr = date.getYear();
+		int fromYr = date.getYear() - 100;
 		int mthNow = date.getMonthValue();
 		int dayNow = date.getDayOfMonth();
-		int toYr = fromYr + 100;
+		int toYr = fromYr + 200;
 
 		String cbMth[] = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
 
 		comboYrS = new JComboBox<String>();
-		comboYrS.setFont(font18Ar);
-
+		comboYrS.setFont(AuthorizationManager2.font18);
+		comboYrS.setForeground(greend1);
+		comboYrS.setBorder(AuthorizationManager2.border);
 		for (int i = fromYr; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
 			comboYrS.addItem(itemYr);
 		}
 
 		comboMthS = new JComboBox<String>(cbMth);
-		comboMthS.setFont(font18Ar);
+		comboMthS.setFont(AuthorizationManager2.font18);
+		comboMthS.setForeground(greend1);
+		comboMthS.setBorder(AuthorizationManager2.border);
 
 		comboDayS = new JComboBox<String>();
-		comboDayS.setFont(font18Ar);
+		comboDayS.setFont(AuthorizationManager2.font18);
+		comboDayS.setForeground(greend1);
+		comboDayS.setBorder(AuthorizationManager2.border);
 
 		for (int i = 1; i < 32; i++) {
 			String itemDay = Integer.toString(i);
 
 			comboDayS.addItem(itemDay);
 		}
-
+		comboYrS.setSelectedItem(yrNow);
 		comboMthS.setSelectedIndex(mthNow - 1);
 		comboDayS.setSelectedIndex(dayNow - 1);
 
 		JPanel comboDateBox = new JPanel();
-		comboDateBox.setPreferredSize(new Dimension(420, 40));
-		comboDateBox.setLayout(new FlowLayout(0, 10, 0));
+		comboDateBox.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
+		comboDateBox.setLayout(new FlowLayout(0, x10, 0));
 		comboDateBox.setBackground(vlgreen);
 
-		JTextField emptyD = new JTextField(40);
-		emptyD.setBackground(vlgreen);
-		emptyD.setBorder(null);
-
-		comboDateBox.add(emptyD);
 		comboDateBox.add(comboYrS);
 		comboDateBox.add(comboMthS);
 		comboDateBox.add(comboDayS);
 
 		JPanel valid = new JPanel();
-		valid.setPreferredSize(new Dimension(420, 40));
+		valid.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		valid.setBackground(vlgreen);
-		valid.setLayout(new FlowLayout(0, 10, 0));
-
-		JTextField emptyV = new JTextField(40);
-		emptyV.setBorder(null);
-		emptyV.setEditable(false);
-		emptyV.setBackground(vlgreen);
+		valid.setLayout(new FlowLayout(0, x10, 0));
 
 		String cbValid[] = { "true", "false" };
-		comboValid = new JComboBox<String>(cbValid);
-		comboValid.setFont(font18Ar);
+		setComboValid(new JComboBox<String>(cbValid));
+		getComboValid().setFont(AuthorizationManager2.font18);
+		getComboValid().setForeground(greend1);
+		getComboValid().setBorder(AuthorizationManager2.border);
 
-		valid.add(emptyV);
-		valid.add(comboValid);
+		valid.add(getComboValid());
 
 		JPanel userId = new JPanel();
-		userId.setPreferredSize(new Dimension(420, 40));
+		userId.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		userId.setBackground(vlgreen);
-		userId.setLayout(new FlowLayout(0, 10, 0));
+		userId.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyO = new JTextField(30);
-		emptyO.setBorder(null);
-		emptyO.setEditable(false);
-		emptyO.setBackground(vlgreen);
-
-		inpUserId = new JTextField(10);
-		inpUserId.setBackground(Color.white);
-		inpUserId.setFont(font18Ar);
-		inpUserId.setEditable(false);
+		setInpUserId(new JTextField(tf10));
+		getInpUserId().setBackground(Color.white);
+		getInpUserId().setForeground(greend1);
+		getInpUserId().setFont(AuthorizationManager2.font18);
+		getInpUserId().setBorder(AuthorizationManager2.border);
+		getInpUserId().setEditable(false);
 
 		ok = new JButton("OK");
 		ok.setActionCommand("ok");
-		ok.setPreferredSize(new Dimension(70, 30));
-		ok.setFont(font18);
+		ok.setPreferredSize(new Dimension(e70, e30));
+		ok.setFont(AuthorizationManager2.font18);
+		ok.setBorder(AuthorizationManager2.border);
 		ok.setForeground(greend1);
 		ok.addActionListener(this);
 
-		userId.add(emptyO);
-		userId.add(inpUserId);
+		userId.add(getInpUserId());
 		userId.add(ok);
-		
+
 		JPanel pwInit = new JPanel();
-		pwInit.setPreferredSize(new Dimension(420, 40));
+		pwInit.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		pwInit.setBackground(vlgreen);
-		pwInit.setLayout(new FlowLayout(0, 10, 0));
+		pwInit.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyP = new JTextField(30);
-		emptyP.setBorder(null);
-		emptyP.setEditable(false);
-		emptyP.setBackground(vlgreen);
+		setInpPwInit(new JPasswordField(tf10));
+		getInpPwInit().setBackground(Color.white);
+		getInpPwInit().setForeground(greend1);
+		getInpPwInit().setFont(AuthorizationManager2.font18);
+		getInpPwInit().setBorder(AuthorizationManager2.border);
 
-		inpPwInit = new JPasswordField(10);
-		inpPwInit.setBackground(Color.white);
-		inpPwInit.setFont(font18Ar);
-				
-		pwInit.add(emptyP);
-		pwInit.add(inpPwInit);
+		pwInit.add(getInpPwInit());
 
-		midRPanel.add(id);
-		midRPanel.add(name);
-		midRPanel.add(sname);
-		midRPanel.add(email);
-		midRPanel.add(comboDateBox);
-		midRPanel.add(valid);
-		midRPanel.add(userId);
-		midRPanel.add(pwInit);
+		JPanel tab = new JPanel();
+		tab.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.25)));
+		tab.setBackground(Color.yellow);
+		tab.setLayout(new FlowLayout(0, 0, 0));
 
-		return midRPanel;
+		midRTopPanel.add(id);
+		midRTopPanel.add(name);
+		midRTopPanel.add(sname);
+		midRTopPanel.add(email);
+		midRTopPanel.add(comboDateBox);
+		midRTopPanel.add(valid);
+		midRTopPanel.add(userId);
+		midRTopPanel.add(pwInit);
+
+		return midRTopPanel;
 	}
 
 	/*
-	 * midBotPanel part of midPanel -- Buttons
+	 * MidRBotPanel -- console
+	 */
+	private Component midRBotPanel() {
+		midRBotPanel = new JPanel();
+		midRBotPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.21)));
+		midRBotPanel.setLayout(new FlowLayout());
+		midRBotPanel.setBackground(vlgreen);
+
+		JTabbedPane tabbed = new JTabbedPane(JTabbedPane.LEFT);
+		tabbed.setBackground(vlgreen);
+		tabbed.setBorder(AuthorizationManager2.border);
+		tabbed.add(new Console(), "Message");
+
+		midRBotPanel.add(tabbed);
+
+		return midRBotPanel;
+	}
+
+	/*
+	 * MidBotPanel -- part of midPanel
 	 */
 	private Component midBotPanel() {
+		int e100 = (int) Math.round(w * 0.078);
+		int e30 = (int) Math.round(h * 0.042);
 		midBotPanel = new JPanel();
-		midBotPanel.setPreferredSize(new Dimension(660, 50));
+		midBotPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.069)));
 		midBotPanel.setLayout(new FlowLayout());
 		midBotPanel.setBackground(greend1);
 
@@ -405,8 +473,9 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		for (int i = 0; i < 3; i++) {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
-			button.setPreferredSize(new Dimension(100, 40));
-			button.setFont(font18);
+			button.setPreferredSize(new Dimension(e100, e30));
+			button.setFont(AuthorizationManager2.font18);
+			button.setBorder(AuthorizationManager2.border);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midBotPanel.add(button);
@@ -426,7 +495,7 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		 * go back to the previous screen
 		 */
 		case "Back": {
-
+			AuthorizationManager2.cpyArea.setText(Console.console.getText());
 			AuthorizationManager2.getMidRightPanel().removeAll();
 
 			AuthorizationManager2.getMidRightPanel().validate();
@@ -439,31 +508,33 @@ public class NewUserScrn extends JPanel implements ActionListener {
 
 			AuthorizationManager2.getMidLeftTopPanel().validate();
 			AuthorizationManager2.getMidLeftTopPanel().repaint();
+			AuthorizationManager2.setScreen("default");
 			break;
 		}
 		/*
 		 * clear input text fields
 		 */
 		case "Clear": {
-
+			AuthorizationManager2.cpyArea.setText(Console.console.getText());
 			AuthorizationManager2.getMidRightPanel().removeAll();
 
-			AuthorizationManager2.getMidRightPanel().add(new UpdUsrIdScrn(), "newPanel");
+			AuthorizationManager2.getMidRightPanel().add(new NewUserScrn(), "newPanel");
 
 			AuthorizationManager2.getMidRightPanel().revalidate();
 			AuthorizationManager2.getMidRightPanel().repaint();
+			AuthorizationManager2.getCmbUser().setSelectedIndex(0);
+			Console.console.setText(AuthorizationManager2.cpyArea.getText());
 		}
 			break;
-
 		/*
 		 * save the change in the DataUser arraylist
 		 */
 		case "Save":
 
-			String selValid = (String) comboValid.getSelectedItem();
-			String selYrS = (String) comboYrS.getSelectedItem();
-			String selMthS = (String) comboMthS.getSelectedItem();
-			String selDayS = (String) comboDayS.getSelectedItem();
+			selValid = (String) comboValid.getSelectedItem();
+			selYrS = (String) comboYrS.getSelectedItem();
+			selMthS = (String) comboMthS.getSelectedItem();
+			selDayS = (String) comboDayS.getSelectedItem();
 
 			insNm = inpName.getText();
 			insSnm = inpSname.getText();
@@ -486,34 +557,57 @@ public class NewUserScrn extends JPanel implements ActionListener {
 					}
 				}
 				if (exists) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "User already exists !!! \n Change name", "Warning",
-							JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nUser already exists!!! Change name. Warning!!!");
 				}
 				if (!exists) {
-					AuthorizationManager2.userData
-							.add(new DataUser(selId, insNm, insSnm, insEmail, insSdate, selValid));
-					AuthorizationManager2.getLog().info("New user: " + insNm + " " + insSnm + " with startdate: "
-							+ insSdate + " inserted \n auth_id = " + selId);
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "New user inserted", "Info",
-							JOptionPane.INFORMATION_MESSAGE);
-					String selIdTxt = Integer.toString(selId);
-					inpId.setText(selIdTxt);
-					checkS = true;
+					timer = new Timer(1, new ActionListener() {
+						int count = 0;
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							progressBar.setValue(++count);
+							progressBar.setForeground(red1);
+							progressBar.setString("saving!!");
+							if (count == 160) {
+								// progressBar.setString("saved!!");
+								AuthorizationManager2.userData
+										.add(new DataUser(selId, insNm, insSnm, insEmail, insSdate, selValid));
+								String selIdTxt = Integer.toString(selId);
+								getInpId().setText(selIdTxt);
+								getInpId().setBackground(red1);
+								checkS = true;
+
+								AuthorizationManager2.getLog().info("New user: " + insNm + " " + insSnm
+										+ " with startdate: " + insSdate + " inserted \n auth_id = " + selId);
+								Console.console.setForeground(greend1);
+								Console.console.append("\nNew user: " + insNm + " " + insSnm + " with startdate: "
+										+ insSdate + " inserted \n auth_id = " + selId);
+							}
+							if (count > 160) {
+								timer.stop();
+								progressBar.setForeground(greend1);
+								progressBar.setString("saved!!");
+							}
+						}
+					});
+
+					progressBar.setValue(0);
+					progressBar.setStringPainted(true);
+					timer.start();
 				}
 			} else {
 				if (insNm.isEmpty() && insSnm.isEmpty()) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "No input", "Info", JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nNo Input !!!");
 				}
 				if (insNm.isEmpty() && !insSnm.isEmpty()) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "Enter Name", "Info", JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nEnter Name !!");
 				}
 				if (insSnm.isEmpty() && !insNm.isEmpty()) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "Enter Surname", "Info", JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nEnter Surname !!");
 				}
 			}
 			break;
@@ -521,85 +615,148 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		 * Create an userid and add to the arraylist DataUserId
 		 */
 		case "ok":
-			char[] getPwdI = inpPwInit.getPassword();
-			String selPwdI = String.valueOf(getPwdI);
-			if (checkS) {
-				if (AuthorizationManager2.getUsrPat().matches("default")) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "Choose an user pattern!!", "Warning",
-							JOptionPane.INFORMATION_MESSAGE);
-					
+			getPwdI = inpPwInit.getPassword();
+			selPwdI = String.valueOf(getPwdI);
+			usrPat = (String) AuthorizationManager2.getCmbUser().getSelectedItem();
+			selYrS = (String) comboYrS.getSelectedItem();
+			selMthS = (String) comboMthS.getSelectedItem();
+			selDayS = (String) comboDayS.getSelectedItem();
+
+			exists = false;
+			insSdate = selYrS + "-" + selMthS + "-" + selDayS;
+			insEdate = "9999-12-31";
+			selValid1 = (String) comboValid.getSelectedItem();
+			val1 = Boolean.parseBoolean(selValid1);
+			block1 = false;
+			selLvl = "2";
+			selPwStat = "i";
+
+			if (!checkS) {
+				Console.console.setForeground(red2);
+				Console.console.append("\nSave first new user before creating userid");
+				break;
+			} else {
+				if (usrPat.matches("default")) {
+					Console.console.setForeground(red2);
+					Console.console.append("\nChoose an user pattern!!");
 					return;
 				}
-				if(selPwdI.isEmpty()) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "Field Init Password is empty !!", "Info",
-							JOptionPane.INFORMATION_MESSAGE);
+				if (selPwdI.isEmpty()) {
+					Console.console.setForeground(red2);
+					Console.console.append("\nField Init Password is empty !!");
 					return;
-				} else {
-					String newId = Integer.toString(selId);
-					String useridN = AuthorizationManager2.getUsrPat() + newId.substring(2);
-					String userid;
-					inpUserId.setText(useridN);
-
-					boolean exists = false;
-
-					String insEdate = "9999-12-31";
-					String selValid1 = (String) comboValid.getSelectedItem();
-					Boolean val1 = Boolean.parseBoolean(selValid1);
-					Boolean block1 = false;
-					String selLvl = "2";
-					String selPwStat = "i";
-
-					String newPwd;
-					
-						try {
-							newPwd = encrypt(selPwdI.getBytes(UTF_8), eCode);
-							for (DataUserId d1 : AuthorizationManager2.userIdData) {
-								userid = d1.getUser();
-								if (useridN.equals(userid)) {
-									exists = true;
-								}
-							}
-							if (exists) {
-								JFrame message = new JFrame();
-								JOptionPane.showMessageDialog(message,
-										"User already exists !!! \n Choose other user_Id", "Warning",
-										JOptionPane.INFORMATION_MESSAGE);
-							}
-							if (!exists) {
-								AuthorizationManager2.userIdData.add(new DataUserId(selId, useridN, newPwd, insSdate,
-										insEdate, val1, block1, selLvl, selPwStat));
-								AuthorizationManager2.getLog().info("UserId: " + useridN + " with startdate: "
-										+ insSdate + " inserted \n auth_id = " + selId);
-								JFrame message = new JFrame();
-								JOptionPane.showMessageDialog(message, "New userid created", "Info",
-										JOptionPane.INFORMATION_MESSAGE);
-
-								inpId.setText("");
-								inpName.setText("");
-								inpSname.setText("");
-								inpEmail.setText("");
-								comboValid.setSelectedIndex(0);
-								comboMthS.setSelectedIndex(mthNow - 1);
-								comboDayS.setSelectedIndex(dayNow - 1);
-								inpUserId.setText("");
-								inpPwInit.setText("");
-								checkS = false;
-							} 
-
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-						}
+				}
 			}
-				checkS = false;
-			} else {
-				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "Save first new user before creating userid", "Info",
-						JOptionPane.INFORMATION_MESSAGE);
+			if (checkS) {
+				timer = new Timer(1, new ActionListener() {
+					int count = 0;
 
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						progressBar.setValue(++count);
+						progressBar.setForeground(red1);
+						progressBar.setString("creating!!");
+
+						if (count == 160) {
+							newId = getInpId().getText();
+							useridN = usrPat + newId.substring(2);
+							try {
+								newPwd = encrypt(selPwdI.getBytes(UTF_8), eCode);
+								for (DataUserId d1 : AuthorizationManager2.userIdData) {
+									userid = d1.getUser();
+									inpUserId.setBackground(red1);
+									inpUserId.setText(useridN);
+									if (useridN.equals(userid)) {
+										exists = true;
+									}
+								}
+								if (exists) {
+									Console.console.setForeground(red2);
+									Console.console.append("\nUser already exists !!! \\n Choose other user_Id");
+								}
+								if (!exists) {
+									AuthorizationManager2.userIdData.add(new DataUserId(selId, useridN, newPwd,
+											insSdate, insEdate, val1, block1, selLvl, selPwStat));
+									AuthorizationManager2.getLog().info("UserId: " + useridN + " with startdate: "
+											+ insSdate + " inserted \n auth_id = " + selId);
+									Console.console.setForeground(greend1);
+									Console.console.append("\nNew userid '" + useridN + "' created");
+
+									return;
+								}
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+							}
+						}
+						if (count > 160) {
+							timer.stop();
+							checkS = false;
+							progressBar.setForeground(greend1);
+							progressBar.setString("created!!");
+						}
+					}
+				});
+				progressBar.setValue(0);
+				progressBar.setStringPainted(true);
+				timer.start();
+				break;
 			}
 		}
 	}
 
+	public static JTextField getInpId() {
+		return inpId;
+	}
+
+	public void setInpId(JTextField inpId) {
+		NewUserScrn.inpId = inpId;
+	}
+
+	public static JTextField getInpName() {
+		return inpName;
+	}
+
+	public void setInpName(JTextField inpName) {
+		NewUserScrn.inpName = inpName;
+	}
+
+	public static JTextField getInpSname() {
+		return inpSname;
+	}
+
+	public void setInpSname(JTextField inpSname) {
+		NewUserScrn.inpSname = inpSname;
+	}
+
+	public static JTextField getInpEmail() {
+		return inpEmail;
+	}
+
+	public void setInpEmail(JTextField inpEmail) {
+		NewUserScrn.inpEmail = inpEmail;
+	}
+
+	public static JComboBox<String> getComboValid() {
+		return comboValid;
+	}
+
+	public void setComboValid(JComboBox<String> comboValid) {
+		NewUserScrn.comboValid = comboValid;
+	}
+
+	public static JTextField getInpUserId() {
+		return inpUserId;
+	}
+
+	public void setInpUserId(JTextField inpUserId) {
+		NewUserScrn.inpUserId = inpUserId;
+	}
+
+	public static JPasswordField getInpPwInit() {
+		return inpPwInit;
+	}
+
+	public void setInpPwInit(JPasswordField inpPwInit) {
+		NewUserScrn.inpPwInit = inpPwInit;
+	}
 }

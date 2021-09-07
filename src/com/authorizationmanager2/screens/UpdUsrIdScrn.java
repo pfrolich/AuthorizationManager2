@@ -16,9 +16,14 @@ import javax.swing.*;
 
 import com.authorizationmanager2.AuthorizationManager2;
 import com.authorizationmanager2.data.DataUserId;
+import com.authorizationmanager2.tabbedpane.Console;
 
 public class UpdUsrIdScrn extends JPanel implements ActionListener {
-
+	/*
+	 * Full screen definitions
+	 */
+	public static int w;
+	public static int h;
 	/**
 	 * Definitions: Panels, Buttons, ComboBoxes, TextAreas, TextFields, Labels,
 	 * etc...
@@ -28,14 +33,21 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	private JPanel midPanel;
 	private JPanel midLPanel;
 	private JPanel midRPanel;
+	private JPanel midRBotPanel;
+	private JPanel midRTopPanel;
 	private JPanel midBotPanel;
 	private JPanel topPanel;
-
+	/*
+	 * definitions midLpanel
+	 */
 	private JLabel label;
-
-	private JTextField inpUser;
+	private JProgressBar progressBar;
+	/*
+	 * definitions midRpanel
+	 */
+	private static JTextField inpUser;
 	private JTextField inpPassW;
-	private JTextField inpId;
+	private static JTextField inpId;
 
 	private JButton button;
 
@@ -47,48 +59,42 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	private String updValid;
 	private String updLvl;
 	private String updBlock;
+	public static Boolean status = false;
+	/*
+	 * date /time definitions
+	 */
+	private static Timer timer;
 
-	private Boolean status = false;
-
-	private JComboBox<String> comboValid;
+	public static JComboBox<String> comboValid;
 	private JComboBox<String> comboBlock;
-	private JComboBox<String> comboLvl;
-	private JComboBox<String> comboYrS;
-	private JComboBox<String> comboMthS;
-	private JComboBox<String> comboDayS;
-	private JComboBox<String> comboYrE;
-	private JComboBox<String> comboMthE;
-	private JComboBox<String> comboDayE;
+	public static JComboBox<String> comboLvl;
+	public static JComboBox<String> comboYrS;
+	public static JComboBox<String> comboMthS;
+	public static JComboBox<String> comboDayS;
+	public static JComboBox<String> comboYrE;
+	public static JComboBox<String> comboMthE;
+	public static JComboBox<String> comboDayE;
 
 	private LocalDate date = LocalDate.now();
-	private int mthNow;
-	private int dayNow;
-
-	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
-	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
-
-	public static Color blue1 = new Color(173, 193, 235);
-	public static Color vlblue = new Color(235, 235, 250);
-	public static Color blue2 = new Color(179, 198, 255);
-	public static Color blue = new Color(0, 60, 179);
-	public static Color blued4 = new Color(0, 60, 179);
-	public static Color blued2 = new Color(0, 34, 102);
-	public static Color blued3 = new Color(20, 20, 82);
-	public static Color blued1 = new Color(0, 43, 128);
-
+	private String yrNow = Integer.toString(date.getYear());
+	private int mthNow = date.getMonthValue();
+	private int dayNow = date.getDayOfMonth();
+	/*
+	 * color definitions
+	 */
+	public static Color red1 = new Color(230, 204, 204);
+	public static Color red2 = new Color(204, 0, 0);
 	public static Color greend1 = new Color(26, 51, 0);
-	public static Color greend2 = new Color(40, 77, 0);
-	public static Color greend3 = new Color(0, 43, 128);
-	public static Color greend4 = new Color(0, 43, 128);
 	public static Color vlgreen = new Color(235, 250, 235);
 	public static Color green1 = new Color(46, 184, 46);
 
 	Thread thread1;
 
 	public UpdUsrIdScrn() {
+		w = AuthorizationManager2.scrW;
+		h = AuthorizationManager2.scrH;
 		newPanel = new JPanel();
-		newPanel.setPreferredSize(new Dimension(700, 580));
+		newPanel.setPreferredSize(new Dimension((int) (w * 0.55), (int) (h * 0.78)));
 		newPanel.setLayout(new GridLayout());
 		newPanel.setBackground(greend1);
 		newPanel.setVisible(true);
@@ -101,9 +107,9 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	 */
 	private Component midPanel() {
 		midPanel = new JPanel();
-		midPanel.setPreferredSize(new Dimension(700, 560));
+		midPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.75)));
 		midPanel.setLayout(new FlowLayout());
-		midPanel.setBackground(vlgreen);
+		midPanel.setBackground(greend1);
 
 		midPanel.add(topPanel());
 		midPanel.add(midLPanel());
@@ -114,17 +120,17 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	}
 
 	/*
-	 * TopPanel  part of midPanel - Title
+	 * TopPanel part of midPanel - Title
 	 */
 	private Component topPanel() {
 		topPanel = new JPanel();
-		topPanel.setPreferredSize(new Dimension(660, 50));
+		topPanel.setPreferredSize(new Dimension((int) (w * 0.55), (int) (h * 0.07)));
 		topPanel.setLayout(new FlowLayout());
 		topPanel.setBackground(greend1);
 
 		JLabel titleInsert = new JLabel("Update  UserId's");
 		titleInsert.setForeground(vlgreen);
-		titleInsert.setFont(font24Ar);
+		titleInsert.setFont(AuthorizationManager2.font24);
 
 		topPanel.add(titleInsert);
 
@@ -135,103 +141,131 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 	 * midLPanel part of midPanel -- Text labels
 	 */
 	private Component midLPanel() {
+		int x10 = (int) Math.round(w * 0.008);
 		midLPanel = new JPanel();
-		midLPanel.setPreferredSize(new Dimension(180, 440));
+		midLPanel.setPreferredSize(new Dimension((int) (w * 0.14), (int) (h * 0.61)));
 		midLPanel.setLayout(new GridLayout(10, 1));
 		midLPanel.setBackground(vlgreen);
 
-		String[] labelText = { "UserId", "Username:", "         ", "Start-date:", "End-date:", "Valid:        ",
-				"Blocked:", "Auth-level: " };
+		JPanel bar = new JPanel();
+		bar.setPreferredSize(new Dimension((int) (w * 0.14), (int) (h * 0.044)));
+		bar.setBackground(vlgreen);
+		bar.setLayout(new FlowLayout(0, x10, 0));
 
-		for (int i = 0; i < 8; i++) {
+		progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100); 
+		progressBar.setBackground(vlgreen);
+		progressBar.setForeground(greend1);
+		progressBar.setBorder(AuthorizationManager2.border);
+
+		bar.add(progressBar);
+
+		String[] labelText = { "  Id", "  Username:", " ", "  Start-date:", "  End-date:", "  Valid: ",
+				"  Blocked:", "  Auth-level: ", " " };
+
+		for (int i = 0; i < 9; i++) {
 			label = new JLabel(labelText[i]);
-			label.setFont(font18);
+			label.setFont(AuthorizationManager2.font18);
 			label.setForeground(greend1);
 			midLPanel.add(label);
 		}
+
+		midLPanel.add(bar);
 
 		return midLPanel;
 	}
 
 	/*
-	 * MidRPanel part of midPanel -- Input textfield
+	 * midRPanel part of midPanel -- contains midRTopPanel & midRBotPanel
 	 */
 	private Component midRPanel() {
 		midRPanel = new JPanel();
-		midRPanel.setPreferredSize(new Dimension(420, 440));
-		midRPanel.setLayout(new GridLayout(10, 1));
+		midRPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.61)));
+		midRPanel.setLayout(new FlowLayout());
 		midRPanel.setBackground(vlgreen);
 
+		midRPanel.add(midRTopPanel());
+		midRPanel.add(midRBotPanel());
+
+		return midRPanel;
+	}
+
+	/*
+	 * midRTopPanel part of midRPanel -- Input textfield
+	 */
+	private Component midRTopPanel() {
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int tf23 = (int) Math.round(w * 0.018);
+		int tf12 = (int) Math.round(w * 0.009375);
+
+		midRTopPanel = new JPanel();
+		midRTopPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.51)));
+		midRTopPanel.setLayout(new GridLayout(8, 1));
+		midRTopPanel.setBackground(vlgreen);
+
 		JPanel id = new JPanel();
-		id.setPreferredSize(new Dimension(420, 40));
+		id.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		id.setBackground(vlgreen);
-		id.setLayout(new FlowLayout(0, 10, 0));
+		id.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyI = new JTextField(30);
-		emptyI.setBorder(null);
-		emptyI.setEditable(false);
-		emptyI.setBackground(vlgreen);
-
-		inpId = new JTextField(5);
-		inpId.setBackground(Color.white);
-		inpId.setFont(font18Ar);
-		inpId.addActionListener(this);
-		inpId.setActionCommand("id");
-		inpId.addKeyListener(new KeyAdapter() {
+		setInpId(new JTextField(5));
+		getInpId().setBackground(Color.white);
+		getInpId().setForeground(greend1);
+		getInpId().setBorder(AuthorizationManager2.border);
+		getInpId().setFont(AuthorizationManager2.font18);
+		getInpId().addActionListener(this);
+		getInpId().setActionCommand("id");
+		getInpId().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent ke) {
 				if (ke.getKeyChar() >= '0' && ke.getKeyChar() <= '9') {
-					inpId.setEditable(true);
+					getInpId().setEditable(true);
 				} else {
 					if (ke.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE
 							|| ke.getExtendedKeyCode() == KeyEvent.VK_ENTER) {
-						inpId.setEditable(true);
+						getInpId().setEditable(true);
 					} else {
-						inpId.setEditable(false);
+						getInpId().setEditable(false);
 						JFrame message = new JFrame();
 						JOptionPane.showMessageDialog(message, "* Enter only numeric digits(0-9)", "INFO",
 								JOptionPane.INFORMATION_MESSAGE);
-						inpId.setEditable(true);
+						getInpId().setEditable(true);
 					}
 				}
 			}
 		});
 
-		id.add(emptyI);
-		id.add(inpId);
+		id.add(getInpId());
 
 		JPanel user = new JPanel();
-		user.setPreferredSize(new Dimension(420, 40));
+		user.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		user.setBackground(vlgreen);
-		user.setLayout(new FlowLayout(0, 10, 0));
+		user.setLayout(new FlowLayout(0, x10, 0));
 
-		JTextField emptyU = new JTextField(25);
-		emptyU.setBorder(null);
-		emptyU.setEditable(false);
-		emptyU.setBackground(vlgreen);
+		setInpUser(new JTextField(tf23));
+		getInpUser().setBackground(Color.white);
+		getInpUser().setFont(AuthorizationManager2.font18);
+		getInpUser().setForeground(greend1);
+		getInpUser().setBorder(AuthorizationManager2.border);
+		getInpUser().addActionListener(this);
+		getInpUser().setActionCommand("user");
 
-		inpUser = new JTextField(23);
-		inpUser.setBackground(Color.white);
-		inpUser.setFont(font18Ar);
-		inpUser.addActionListener(this);
-		inpUser.setActionCommand("user");
+		user.add(getInpUser());
 
-		user.add(emptyU);
-		user.add(inpUser);
-
-		inpPassW = new JTextField(12);
+		inpPassW = new JTextField(tf12);
 		inpPassW.setBackground(vlgreen);
 		inpPassW.setBorder(null);
 		inpPassW.setEditable(false);
 
-		int fromYr = date.getYear();
-		mthNow = date.getMonthValue();
-		dayNow = date.getDayOfMonth();
-		int toYr = fromYr + 100;
+		int fromYr = date.getYear() - 100;
+		int mthNow = date.getMonthValue();
+		int dayNow = date.getDayOfMonth();
+		int toYr = fromYr + 200;
 
 		String cbMth[] = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
 
 		comboYrS = new JComboBox<String>();
-		comboYrS.setFont(font18Ar);
+		comboYrS.setFont(AuthorizationManager2.font18);
+		comboYrS.setForeground(greend1);
+		comboYrS.setBorder(AuthorizationManager2.border);
 
 		for (int i = fromYr; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
@@ -239,10 +273,14 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		}
 
 		comboMthS = new JComboBox<String>(cbMth);
-		comboMthS.setFont(font18Ar);
+		comboMthS.setFont(AuthorizationManager2.font18);
+		comboMthS.setForeground(greend1);
+		comboMthS.setBorder(AuthorizationManager2.border);
 
 		comboDayS = new JComboBox<String>();
-		comboDayS.setFont(font18Ar);
+		comboDayS.setFont(AuthorizationManager2.font18);
+		comboDayS.setForeground(greend1);
+		comboDayS.setBorder(AuthorizationManager2.border);
 
 		for (int i = 1; i < 32; i++) {
 			String itemDay = Integer.toString(i);
@@ -251,127 +289,129 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		}
 
 		comboYrE = new JComboBox<String>();
-		comboYrE.setFont(font18Ar);
+		comboYrE.setFont(AuthorizationManager2.font18);
+		comboYrE.setForeground(greend1);
+		comboYrE.setBorder(AuthorizationManager2.border);
 		comboYrE.addItem("9999");
 
-		for (int i = fromYr; i < toYr; i++) {
+		for (int i = 2020; i < toYr; i++) {
 			String itemYr = Integer.toString(i);
 			comboYrE.addItem(itemYr);
 		}
 
 		comboMthE = new JComboBox<String>(cbMth);
-		comboMthE.setFont(font18Ar);
+		comboMthE.setFont(AuthorizationManager2.font18);
+		comboMthE.setForeground(greend1);
+		comboMthE.setBorder(AuthorizationManager2.border);
 
 		comboDayE = new JComboBox<String>();
-		comboDayE.setFont(font18Ar);
+		comboDayE.setFont(AuthorizationManager2.font18);
+		comboDayE.setForeground(greend1);
+		comboDayE.setBorder(AuthorizationManager2.border);
 
 		for (int i = 31; i > 0; i--) {
 			String itemDay = Integer.toString(i);
 
 			comboDayE.addItem(itemDay);
 		}
-
+		comboYrS.setSelectedItem(yrNow);
 		comboMthS.setSelectedIndex(mthNow - 1);
 		comboDayS.setSelectedIndex(dayNow - 1);
 		comboMthE.setSelectedIndex(11);
 
 		JPanel comboDateBoxS = new JPanel();
-		comboDateBoxS.setPreferredSize(new Dimension(420, 40));
-		comboDateBoxS.setLayout(new FlowLayout(0, 10, 0));
+		comboDateBoxS.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
+		comboDateBoxS.setLayout(new FlowLayout(0, x10, 0));
 		comboDateBoxS.setBackground(vlgreen);
 
-		JTextField emptyS = new JTextField(40);
-		emptyS.setBackground(vlgreen);
-		emptyS.setBorder(null);
-
-		comboDateBoxS.add(emptyS);
 		comboDateBoxS.add(comboYrS);
 		comboDateBoxS.add(comboMthS);
 		comboDateBoxS.add(comboDayS);
 
 		JPanel comboDateBoxE = new JPanel();
-		comboDateBoxE.setPreferredSize(new Dimension(420, 40));
-		comboDateBoxE.setLayout(new FlowLayout(0, 10, 0));
+		comboDateBoxE.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
+		comboDateBoxE.setLayout(new FlowLayout(0, x10, 0));
 		comboDateBoxE.setBackground(vlgreen);
 
-		JTextField emptyE = new JTextField(40);
-		emptyE.setBackground(vlgreen);
-		emptyE.setBorder(null);
-
-		comboDateBoxE.add(emptyE);
 		comboDateBoxE.add(comboYrE);
 		comboDateBoxE.add(comboMthE);
 		comboDateBoxE.add(comboDayE);
 
 		JPanel valid = new JPanel();
-		valid.setPreferredSize(new Dimension(420, 40));
+		valid.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		valid.setBackground(vlgreen);
-		valid.setLayout(new FlowLayout(0, 10, 0));
-
-		JTextField emptyV = new JTextField(40);
-		emptyV.setBorder(null);
-		emptyV.setEditable(false);
-		emptyV.setBackground(vlgreen);
+		valid.setLayout(new FlowLayout(0, x10, 0));
 
 		String cbValid[] = { "true", "false" };
 		comboValid = new JComboBox<String>(cbValid);
-		comboValid.setFont(font18Ar);
+		comboValid.setFont(AuthorizationManager2.font18);
+		comboValid.setForeground(greend1);
+		comboValid.setBorder(AuthorizationManager2.border);
 
-		valid.add(emptyV);
 		valid.add(comboValid);
 
 		JPanel block = new JPanel();
-		block.setPreferredSize(new Dimension(420, 40));
+		block.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		block.setBackground(vlgreen);
-		block.setLayout(new FlowLayout(0, 10, 0));
-
-		JTextField emptyB = new JTextField(35);
-		emptyB.setBorder(null);
-		emptyB.setEditable(false);
-		emptyB.setBackground(vlgreen);
+		block.setLayout(new FlowLayout(0, x10, 0));
 
 		String cbBlock[] = { "true", "false" };
 		comboBlock = new JComboBox<String>(cbBlock);
-		comboBlock.setFont(font18Ar);
+		comboBlock.setFont(AuthorizationManager2.font18);
+		comboBlock.setForeground(greend1);
+		comboBlock.setBorder(AuthorizationManager2.border);
+		comboBlock.setSelectedIndex(1);
 
-		block.add(emptyB);
 		block.add(comboBlock);
 
 		JPanel lvl = new JPanel();
-		lvl.setPreferredSize(new Dimension(420, 40));
+		lvl.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.056)));
 		lvl.setBackground(vlgreen);
-		lvl.setLayout(new FlowLayout(0, 10, 0));
-
-		JTextField emptyL = new JTextField(35);
-		emptyL.setBorder(null);
-		emptyL.setEditable(false);
-		emptyL.setBackground(vlgreen);
+		lvl.setLayout(new FlowLayout(0, x10, 0));
 
 		String cbLvl[] = { "1", "2" };
 		comboLvl = new JComboBox<String>(cbLvl);
-		comboLvl.setFont(font18Ar);
+		comboLvl.setFont(AuthorizationManager2.font18);
+		comboLvl.setForeground(greend1);
+		comboLvl.setBorder(AuthorizationManager2.border);
 
-		lvl.add(emptyL);
 		lvl.add(comboLvl);
 
-		midRPanel.add(id);
-		midRPanel.add(user);
-		midRPanel.add(inpPassW);
-		midRPanel.add(comboDateBoxS);
-		midRPanel.add(comboDateBoxE);
-		midRPanel.add(valid);
-		midRPanel.add(block);
-		midRPanel.add(lvl);
+		midRTopPanel.add(id);
+		midRTopPanel.add(user);
+		midRTopPanel.add(inpPassW);
+		midRTopPanel.add(comboDateBoxS);
+		midRTopPanel.add(comboDateBoxE);
+		midRTopPanel.add(valid);
+		midRTopPanel.add(block);
+		midRTopPanel.add(lvl);
 
-		return midRPanel;
+		return midRTopPanel;
 	}
 
+	private Component midRBotPanel() {
+		midRBotPanel = new JPanel();
+		midRBotPanel.setPreferredSize(new Dimension((int) (w * 0.33), (int) (h * 0.21)));
+		midRBotPanel.setLayout(new FlowLayout());
+		midRBotPanel.setBackground(vlgreen);
+
+		JTabbedPane tabbed = new JTabbedPane(JTabbedPane.LEFT);
+		tabbed.setBackground(vlgreen);
+		tabbed.setBorder(AuthorizationManager2.border);
+		tabbed.add(new Console(), "Message");
+
+		midRBotPanel.add(tabbed);
+
+		return midRBotPanel;
+	}
 	/*
-	 * midBotPanel part of midPanel -- Buttons
+	 * MidBotPanel -- part of midPanel
 	 */
 	private Component midBotPanel() {
+		int e100 = (int) Math.round(w * 0.078);
+		int e30 = (int) Math.round(h * 0.042);
 		midBotPanel = new JPanel();
-		midBotPanel.setPreferredSize(new Dimension(660, 50));
+		midBotPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.069)));
 		midBotPanel.setLayout(new FlowLayout());
 		midBotPanel.setBackground(greend1);
 
@@ -379,8 +419,8 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		for (int i = 0; i < 3; i++) {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
-			button.setPreferredSize(new Dimension(100, 30));
-			button.setFont(font18);
+			button.setPreferredSize(new Dimension(e100, e30));
+			button.setFont(AuthorizationManager2.font18);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midBotPanel.add(button);
@@ -400,7 +440,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 		 * go back to the previous screen
 		 */
 		case "Back": {
-
+			AuthorizationManager2.cpyArea.setText(Console.console.getText());
 			AuthorizationManager2.getMidRightPanel().removeAll();
 			AuthorizationManager2.getMidLeftTopPanel().removeAll();
 
@@ -413,76 +453,102 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 
 			AuthorizationManager2.getMidRightPanel().validate();
 			AuthorizationManager2.getMidRightPanel().repaint();
+			AuthorizationManager2.setScreen("default");
 			break;
 		}
 		/*
 		 * clear input text fields
 		 */
 		case "Clear": {
-
+			AuthorizationManager2.cpyArea.setText(Console.console.getText());
 			AuthorizationManager2.getMidRightPanel().removeAll();
 
 			AuthorizationManager2.getMidRightPanel().add(new UpdUsrIdScrn(), "newPanel");
 
 			AuthorizationManager2.getMidRightPanel().revalidate();
 			AuthorizationManager2.getMidRightPanel().repaint();
+			Console.console.setText(AuthorizationManager2.cpyArea.getText());
 
-			break;
 		}
+			break;
 		/*
 		 * save the change in the DataUserId arraylist
 		 */
 		case "Save": {
 			if (status) {
-				selId = Integer.parseInt(inpId.getText());
-				selUser = inpUser.getText();
-				updValid = (String) comboValid.getSelectedItem();
-				updLvl = (String) comboLvl.getSelectedItem();
-				updBlock = (String) comboBlock.getSelectedItem();
-				String updYrS = (String) comboYrS.getSelectedItem();
-				String updMthS = (String) comboMthS.getSelectedItem();
-				String updDayS = (String) comboDayS.getSelectedItem();
-				String updYrE = (String) comboYrE.getSelectedItem();
-				String updMthE = (String) comboMthE.getSelectedItem();
-				String updDayE = (String) comboDayE.getSelectedItem();
+				timer = new Timer(1, new ActionListener() {
+					int count = 0;
 
-				updSdate = updYrS + "-" + updMthS + "-" + updDayS;
-				updEdate = updYrE + "-" + updMthE + "-" + updDayE;
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						progressBar.setValue(++count);
+						progressBar.setForeground(red1);
+						progressBar.setString("saving!!");
+						if (count == 160) {
+							selId = Integer.parseInt(inpId.getText());
+							selUser = inpUser.getText();
+							updValid = (String) comboValid.getSelectedItem();
+							updLvl = (String) comboLvl.getSelectedItem();
+							updBlock = (String) comboBlock.getSelectedItem();
+							String updYrS = (String) comboYrS.getSelectedItem();
+							String updMthS = (String) comboMthS.getSelectedItem();
+							String updDayS = (String) comboDayS.getSelectedItem();
+							String updYrE = (String) comboYrE.getSelectedItem();
+							String updMthE = (String) comboMthE.getSelectedItem();
+							String updDayE = (String) comboDayE.getSelectedItem();
 
-				Boolean updVal = Boolean.parseBoolean(updValid);
-				Boolean updBlk = Boolean.parseBoolean(updBlock);
+							updSdate = updYrS + "-" + updMthS + "-" + updDayS;
+							updEdate = updYrE + "-" + updMthE + "-" + updDayE;
 
-				for (int i = 0; i < AuthorizationManager2.userIdData.size(); i++) {
-					if (AuthorizationManager2.userIdData.get(i).getId() == selId) {
+							Boolean updVal = Boolean.parseBoolean(updValid);
+							Boolean updBlk = Boolean.parseBoolean(updBlock);
 
-						selPwd = AuthorizationManager2.userIdData.get(i).getdPwd();
-						String selPwStat = AuthorizationManager2.userIdData.get(i).getPwStat();
-						AuthorizationManager2.userIdData.set(i,
-								new DataUserId(selId, selUser, selPwd, updSdate, updEdate, updVal, updBlk, updLvl, selPwStat));
+							for (int i = 0; i < AuthorizationManager2.userIdData.size(); i++) {
+								if (AuthorizationManager2.userIdData.get(i).getId() == selId) {
+
+									selPwd = AuthorizationManager2.userIdData.get(i).getdPwd();
+									String selPwStat = AuthorizationManager2.userIdData.get(i).getPwStat();
+									AuthorizationManager2.userIdData.set(i, new DataUserId(selId, selUser, selPwd,
+											updSdate, updEdate, updVal, updBlk, updLvl, selPwStat));
+								}
+							}
+							AuthorizationManager2.getLog().info("UserId: " + selUser + " with startdate: " + updSdate
+									+ " changed \n auth_id = " + selId);
+							Console.console.append("\nUser " + inpUser.getText() + " changed");
+
+							inpId.setText("");
+							inpId.setBackground(Color.white);
+							inpId.setEditable(true);
+							inpUser.setText("");
+							comboValid.setSelectedIndex(0);
+							comboBlock.setSelectedIndex(1);
+							comboLvl.setSelectedIndex(1);
+							comboYrS.setSelectedItem(yrNow);
+							comboMthS.setSelectedIndex(mthNow - 1);
+							comboDayS.setSelectedIndex(dayNow - 1);
+							comboYrE.setSelectedIndex(0);
+							comboMthE.setSelectedIndex(11);
+							comboDayE.setSelectedIndex(0);
+							status = false;
+						}
+						if (count > 160) {
+							timer.stop();
+							progressBar.setForeground(greend1);
+							progressBar.setString("saved!!");
+						}
 					}
-				}
-				AuthorizationManager2.getLog()
-						.info("UserId: " + selUser + " with startdate: " + updSdate + " changed \n auth_id = " + selId);
-				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "User " + inpUser.getText() + " changed", "Info",
-						JOptionPane.INFORMATION_MESSAGE);
-				inpId.setText("");
-				inpUser.setText("");
-				comboValid.setSelectedIndex(0);
-				comboBlock.setSelectedIndex(1);
-				comboLvl.setSelectedIndex(1);
-				comboMthS.setSelectedIndex(mthNow - 1);
-				comboDayS.setSelectedIndex(dayNow - 1);
-				comboYrE.setSelectedIndex(0);
-				comboMthE.setSelectedIndex(11);
-				comboDayE.setSelectedIndex(0);
-				status = false;
+				});
+
+				progressBar.setValue(0);
+				progressBar.setStringPainted(true);
+				timer.start();
+				break;
 			} else {
-				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "No input", "Info", JOptionPane.INFORMATION_MESSAGE);
+				Console.console.setForeground(red2);
+				Console.console.append("\nNo Input !!!");
 			}
 			break;
-			}
+		}
 		/*
 		 * get the data with the key id from the arraylist
 		 */
@@ -514,16 +580,16 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 					comboBlock.setSelectedItem(blk);
 					comboLvl.setSelectedItem(level);
 
-					inpId.setBackground(Color.red);
+					inpId.setBackground(red1);
 					inpId.setEditable(false);
-					inpId.setEnabled(false);
+					inpId.setDisabledTextColor(greend1);
 
 					status = true;
 					return;
 				}
 			}
-			JFrame messageI = new JFrame();
-			JOptionPane.showMessageDialog(messageI, "Not a valid Id!!!", "Info", JOptionPane.INFORMATION_MESSAGE);
+			Console.console.setForeground(red2);
+			Console.console.append("\nNot a valid Id!!!");
 			break;
 		/*
 		 * get the data with the key user from the arraylist
@@ -557,7 +623,7 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 					comboBlock.setSelectedItem(blk);
 					comboLvl.setSelectedItem(level);
 
-					inpId.setBackground(Color.red);
+					inpId.setBackground(red1);
 					inpId.setEditable(false);
 					inpId.setEnabled(false);
 					status = true;
@@ -565,9 +631,26 @@ public class UpdUsrIdScrn extends JPanel implements ActionListener {
 					return;
 				}
 			}
-			JFrame messageN = new JFrame();
-			JOptionPane.showMessageDialog(messageN, "Not a valid username", "Info", JOptionPane.INFORMATION_MESSAGE);
+			Console.console.setForeground(red2);
+			Console.console.append("\nNot a valid username");
 			break;
 		}
 	}
+
+	public static JTextField getInpId() {
+		return inpId;
+	}
+
+	public void setInpId(JTextField inpId) {
+		UpdUsrIdScrn.inpId = inpId;
+	}
+
+	public static JTextField getInpUser() {
+		return inpUser;
+	}
+
+	public void setInpUser(JTextField inpUser) {
+		UpdUsrIdScrn.inpUser = inpUser;
+	}
+
 }

@@ -38,32 +38,76 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
 
 import com.authorizationmanager2.data.FileBank;
 import com.authorizationmanager2.data.DataUser;
 import com.authorizationmanager2.data.DataUserId;
+import com.authorizationmanager2.screens.ConsoleScrn;
 import com.authorizationmanager2.screens.DelUserScrn;
-import com.authorizationmanager2.screens.ListScrn;
 import com.authorizationmanager2.screens.NewUserScrn;
 import com.authorizationmanager2.screens.UpdUserScrn;
 import com.authorizationmanager2.screens.UpdUsrIdScrn;
+import com.authorizationmanager2.tabbedpane.Console;
 
 /**
  * @author pfrolich
  * @version 1.0 Date : September 2020
  * 
- *          This is a program for managing users and passwords. 
- *          1. create new users and userid's 
- *          2. update users and options for userid's 
- *          3. delete users 
- *          4. list users and userid's 
- *          5. reset and revoke passwords (password will be an initial password)
+ *          This is a program for managing users and passwords. 1. create new
+ *          users and userid's 2. update users and options for userid's 3.
+ *          delete users 4. list users and userid's 5. reset and revoke
+ *          passwords (password will be an initial password)
  */
 
 public class AuthorizationManager2 extends JFrame implements ActionListener {
+	/*
+	 * Environment definitions
+	 * 
+	 * private static String os;
+	 */
+	private static String workingDir;
+	public static Thread thread1;
 
+	/*
+	 * Full screen definitions
+	 */
+	private static Dimension screenSize;
+	public static int w;
+	public static int h;
+	public static int scrW;
+	public static int scrH;
+
+	private boolean fullScr = false;
+	private boolean login = false;
+	private static String screen = "default";
+
+	private static GraphicsDevice gDevice;
+
+	private String id;
+	private String nameF;
+	private String nameS;
+	private String email;
+	private String cVal;
+	private String cLvl;
+	private String cYrsS;
+	private String cMthS;
+	private String cDayS;
+	private String cYrsE;
+	private String cMthE;
+	private String cDayE;
+	private Boolean sts;
+	private Boolean chk;
+	private String user;
+	private char[] pwdi;
+	private String pwd;
+	private String pat;
+	private String patU;
+	private Color color1;
+	private Color color2;
+	private int maxN;
+	public static JTextArea cpyArea = new JTextArea(20, 29);
 	/**
 	 * Definitions: Panels, Buttons, ComboBoxes, TextAreas, TextFields, Labels,
 	 * etc...
@@ -71,9 +115,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	public static List<DataUserId> userIdData;
 	public static List<DataUser> userData;
-	private static AuthorizationManager2 frame;
+	public static AuthorizationManager2 frame;
 	private Container window;
 	private JPanel mainPanel;
+	private JPanel subMainLeftPanel;
+	private JPanel subMainMidPanel;
+	private JPanel subMainRightPanel;
 	private JPanel topPanel;
 	private JPanel midPanel;
 	private JPanel midLeftPanel;
@@ -94,18 +141,18 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private JButton button;
 	private JButton enter;
 	private JButton enter2;
-	private JButton back;
+	private static JButton back;
 	public static JButton ok;
-	private JButton ok1;
-	private JButton ok2;
+	private static JButton ok1;
+	private static JButton ok2;
 
 	private JTextArea empty;
 	private static JTextArea empty2;
-	private JTextArea empty3;
-	private JTextField userId;
+	public static JTextArea empty3;
+	private static JTextField userId;
 
 	private static JLabel usrSelect;
-	private JLabel userText;
+	private static JLabel userText;
 
 	private JLabel name;
 	private JLabel loggedIn;
@@ -122,7 +169,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	private JLabel oldPw;
 	private JLabel pwdNew1;
 	private JLabel pwdNew2;
-	private JLabel iPwdTxt;
+	private static JLabel iPwdTxt;
 
 	public static JPasswordField inpOldPw;
 	public static JPasswordField inpPwdNew1;
@@ -134,49 +181,79 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	public static char[] pwNew2;
 	public static char[] iPwdNew;
 
-	private JTable table1;
-	private JTable table2;
+	/*
+	 * properties definitions
+	 */
+	private static String defPathIni;
+	private static String defPathUsr;
+	private static String defPathUsrH;
+	private static String defPathUid;
+	private static String defPathUidH;
+	private static String defPathImg;
+	private static String defBackup;
+	private static String defConsole;
+	private static String defConsoleB;
+	private static String defPathLogProp;
+	private static String defPathLogFile;
 
 	private static Properties properties;
+	private static String pathIni;
 	private static String pathUsr;
 	private static String pathUid;
 	private static String pathUsrH;
 	private static String pathUidH;
+	private static String pathImg;
 	private static String backup;
+	private static String consoleF;
+	private static String consoleFB;
 	private static String fileExt;
 	private static String fileUsr;
 	private static String fileUid;
+	private static String userPat;
 	private static String pathLogProp;
 	private static String pathLogFile;
 	private static String dateTimeFormat;
-	
+	/*
+	 * date definitions
+	 */
 	private static LocalDateTime dateTime;
-	private static DateTimeFormatter dateFormatter;  
+	private static DateTimeFormatter dateFormatter;
 	private static String fileDate;
-	
 
 	private Boolean blocked = false;
 	private String inpUser;
 	private String inpIPw;
 	private String newPwd;
-	private static String usrPat;
 	private Boolean existToRevoke;
 	private Boolean existToReset;
+	private Boolean existConsole =  false;
 	public static String option;
+	/*
+	 * Definitions for subMainRPanel
+	 */
+	private JButton exB, miB, maB;
 
+	/*
+	 * color definitions
+	 */
+	public static Color red1 = new Color(230, 204, 204);
+	public static Color red2 = new Color(204, 0, 0);
 	public static Color greend1 = new Color(26, 51, 0);
-	public static Color greend2 = new Color(40, 77, 0);
-	public static Color greend3 = new Color(0, 43, 128);
-	public static Color greend4 = new Color(0, 43, 128);
 	public static Color vlgreen = new Color(235, 250, 235);
 	public static Color green1 = new Color(46, 184, 46);
-
-	private Font font18 = new Font(Font.SANS_SERIF, Font.BOLD, 18);
-	private Font font16 = new Font(Font.SANS_SERIF, Font.BOLD, 16);
-	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
-	private Font font18Ar = new Font("Arial", Font.BOLD, 18);
-
-	private static Logger log = Logger.getLogger("com.authorizationmanager");
+	public static SoftBevelBorder border = new SoftBevelBorder(BevelBorder.RAISED, greend1, greend1, greend1, greend1);
+	/*
+	 * fonts definitions
+	 */
+	public static Font font18;
+	private static Font font16;
+	private Font font14;
+	public static Font font24;
+	private Font title;
+	/*
+	 * logfile definitions
+	 */
+	private static Logger log = Logger.getLogger("com.authorizationmanager2");
 	private static FileHandler logFile;
 
 	private static JScrollPane jsp;
@@ -278,56 +355,59 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 			@Override
 			public void run() {
-				frame = new AuthorizationManager2();
-				frame.setTitle("Developed by P.E. Frölich, Barueri, September 2020");
-				frame.setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\JAR-programs\\images\\pwmimage.png"));
-				frame.setSize(1000, 740);
-				frame.setBackground(greend1);
-				frame.createGui();
-				frame.setLocationRelativeTo(null);
-				frame.setResizable(false);
-				// frame.setUndecorated(true);
-				frame.setVisible(true);
-				frame.addWindowListener(new WindowAdapter() {
-
-					@Override
-					public void windowClosing(WindowEvent e) {
-						super.windowClosing(e);
-
-						int reply = JOptionPane.showConfirmDialog(frame,
-								"Are you sure? \nLogoff first and/or push Quit", "Close window",
-								JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-						if (reply == JOptionPane.YES_OPTION) {
-							// frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-						} else if (reply == JOptionPane.NO_OPTION) {
-							frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-							getLog().info("Window not closed");
-						}
-					}
-				});
+				GraphicsEnvironment gEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+				gDevice = gEnvironment.getDefaultScreenDevice();
+				screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				scrW = screenSize.width * 2 / 3;
+				scrH = screenSize.height * 2 / 3;
 				
+				thread1 = new Thread(this, "thread1");
+
+				workingDir = System.getProperty("user.dir");
+//				os = System.getProperty("os.name").toLowerCase();
+
+				defPathIni = "\\properties\\authorizationmanager2\\authman2.ini";
+				pathIni = workingDir + defPathIni;
+
 				/*
-				 * load of propertiesfile authman.ini
+				 * load of properties file authman2.ini
 				 */
 				properties = new Properties();
 				userIdData = new ArrayList<>();
 				userData = new ArrayList<>();
 
 				try {
-					properties.load(new FileInputStream("C:\\JAR-programs\\properties\\authorizationmanager\\authman2.ini"));
+					properties.load(
+							new FileInputStream(pathIni));
 					
-					pathUsr = properties.getProperty("path-usr");
-					pathUsrH = properties.getProperty("path-usrh");
-					pathUid = properties.getProperty("path-uid");
-					pathUidH = properties.getProperty("path-uidh");
+					defPathUsr = properties.getProperty("path-usr");
+					defPathUsrH = properties.getProperty("path-usrh");
+					defPathUid = properties.getProperty("path-uid");
+					defPathUidH = properties.getProperty("path-uidh");
+					defPathImg = properties.getProperty("path-image");
+					defBackup = properties.getProperty("path-backup");
+					defConsole = properties.getProperty("path-console");
+					defConsoleB = properties.getProperty("path-consoleB");
+					defPathLogProp = properties.getProperty("path-log-properties");
+					defPathLogFile = properties.getProperty("path-log-file");
+
+					pathUsr = workingDir + defPathUsr;
+					pathUsrH = workingDir + defPathUsrH;
+					pathUid = workingDir + defPathUid;
+					pathUidH = workingDir + defPathUidH;
+					pathImg = workingDir + defPathImg;
+					backup = workingDir + defBackup;
+					consoleF = workingDir + defConsole;
+					consoleFB = workingDir + defConsoleB;
+					pathLogProp = workingDir + defPathLogProp;
+					pathLogFile = workingDir + defPathLogFile;
+
 					fileExt = properties.getProperty("file-ext");
-					backup = properties.getProperty("path-backup");
 					fileUsr = properties.getProperty("file-usr-startswith");
 					fileUid = properties.getProperty("file-uid-startswith");
-					pathLogProp = properties.getProperty("path-log-properties");
-					pathLogFile = properties.getProperty("path-log-file");
+					userPat = properties.getProperty("user-patern"); 
 					dateTimeFormat = properties.getProperty("datetime-format");
-
+					
 					LogManager.getLogManager().readConfiguration(new FileInputStream(pathLogProp));
 					log.setLevel(Level.FINE);
 					logFile = new FileHandler(pathLogFile, true);
@@ -337,6 +417,16 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
+				frame = new AuthorizationManager2();
+				frame.setTitle("Developed by P.E. Frölich, Barueri, September 2020");
+				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(pathImg + "pwmimage.png"));
+				frame.setSize(scrW, scrH);
+				frame.setBackground(greend1);
+				frame.createGui();
+				frame.setLocationRelativeTo(null);
+				frame.setResizable(false);
+				frame.setUndecorated(true);
+				frame.setVisible(true);
 			}
 		});
 
@@ -345,7 +435,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	protected void createGui() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window = getContentPane();
+		window.setSize(scrW, scrH);
 		window.setLayout(new FlowLayout());
+		w = scrW;
+		h = scrH;
+
+		creFont();
 
 		window.add(mainPanel());
 	}
@@ -353,19 +448,149 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	/*
 	 * create MainPanel
 	 */
+	private void creFont() {
+		int f1 = (int) Math.round(w * 0.011);
+		font14 = new Font("Arial", Font.BOLD, f1);
+		int f2 = (int) Math.round(w * 0.01875);
+		font24 = new Font(Font.SANS_SERIF, Font.BOLD, f2);
+		int f3 = (int) Math.round(w * 0.0125);
+		font16 = new Font(Font.SANS_SERIF, Font.BOLD, f3);
+		int f4 = (int) Math.round(w * 0.014);
+		font18 = new Font(Font.SANS_SERIF, Font.BOLD, f4);
+		int ft = (int) Math.round(w * 0.0375);
+		title = new Font(Font.SANS_SERIF, Font.BOLD, ft);
+
+	}
+
+	private void setFullScreen() {
+		frame.remove(mainPanel);
+		frame.repaint();
+		gDevice.setFullScreenWindow(frame);
+
+		scrW = frame.getWidth();
+		scrH = frame.getHeight();
+
+		creFont();
+		createGui();
+
+		if (login) {
+			status.setForeground(Color.green);
+			status.setText("true");
+			name.setText("name: " + loginName);
+			subMainMidPanel.remove(midPanel);
+			getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.56), (int) (h * 0.78)));
+			subMainMidPanel.revalidate();
+			subMainMidPanel.repaint();
+
+			getMidLeftTopPanel().add(combo);
+			getMidLeftTopPanel().add(ok);
+			getMidLeftTopPanel().add(getEmpty2());
+		}
+	}
+
+	private void endFullScreen() {
+		frame.remove(mainPanel);
+		frame.repaint();
+		gDevice.setFullScreenWindow(null);
+
+		scrW = screenSize.width * 2 / 3;
+		scrH = screenSize.height * 2 / 3;
+
+		creFont();
+		createGui();
+
+		if (login) {
+			status.setForeground(Color.green);
+			status.setText("true");
+			name.setText("name: " + loginName);
+			subMainMidPanel.remove(midPanel);
+			getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.56), (int) (h * 0.78)));
+			subMainMidPanel.revalidate();
+			subMainMidPanel.repaint();
+
+			getMidLeftTopPanel().add(combo);
+			getMidLeftTopPanel().add(ok);
+			getMidLeftTopPanel().add(getEmpty2());
+		}
+	}
+
 	private Component mainPanel() {
 		mainPanel = new JPanel();
-		mainPanel.setPreferredSize(new Dimension(1000, 740));
-		mainPanel.setLayout(new FlowLayout());
-		mainPanel.setBackground(greend1);
+		mainPanel.setPreferredSize(new Dimension(scrW, scrH));
+		mainPanel.setLayout(new FlowLayout(0));
+		mainPanel.setBackground(vlgreen);
 
-		mainPanel.add(topPanel());
-		mainPanel.add(midLeftPanel());
-		mainPanel.add(midPanel());
-		mainPanel.add(midRightPanel());
-		mainPanel.add(botPanel());
+		mainPanel.add(subMainleftPanel());
+		mainPanel.add(subMainMidPanel());
+		mainPanel.add(subMainRightPanel());
 
 		return mainPanel;
+	}
+
+	private Component subMainleftPanel() {
+		subMainLeftPanel = new JPanel();
+		subMainLeftPanel.setPreferredSize(new Dimension((int) (w * 0.108), h));
+		subMainLeftPanel.setLayout(new FlowLayout());
+		subMainLeftPanel.setBackground(greend1);
+
+		return subMainLeftPanel;
+	}
+
+	private Component subMainMidPanel() {
+		subMainMidPanel = new JPanel();
+		subMainMidPanel.setPreferredSize(new Dimension((int) (w * 0.77), h));
+		subMainMidPanel.setLayout(new FlowLayout());
+		subMainMidPanel.setBackground(greend1);
+
+		subMainMidPanel.add(topPanel());
+		subMainMidPanel.add(midLeftPanel());
+		subMainMidPanel.add(midPanel());
+		subMainMidPanel.add(midRightPanel());
+		subMainMidPanel.add(botPanel());
+
+		return subMainMidPanel;
+	}
+
+	private Component subMainRightPanel() {
+		subMainRightPanel = new JPanel();
+		subMainRightPanel.setPreferredSize(new Dimension((int) (w * 0.108), scrH));
+		subMainRightPanel.setLayout(new FlowLayout());
+		subMainRightPanel.setBackground(greend1);
+
+		int sbW = (int) Math.round(w * 0.025);
+		int sbH = (int) Math.round(h * 0.035);
+		exB = new JButton();
+		exB.setIcon(new ImageIcon(pathImg + "iconexitg.png"));
+		exB.setPreferredSize(new Dimension(sbW, sbH));
+		exB.setFont(font18);
+		exB.setBorder(border);
+		exB.setBackground(vlgreen);
+		exB.setActionCommand("exit");
+		exB.addActionListener(this);
+
+		miB = new JButton();
+		miB.setIcon(new ImageIcon(pathImg + "iconming.png"));
+		miB.setPreferredSize(new Dimension(sbW, sbH));
+		miB.setFont(font18);
+		miB.setBorder(border);
+		miB.setBackground(vlgreen);
+		miB.setActionCommand("minimize");
+		miB.addActionListener(this);
+
+		maB = new JButton();
+		maB.setIcon(new ImageIcon(pathImg + "iconmax2g.gif"));
+		maB.setPreferredSize(new Dimension(sbW, sbH));
+		maB.setFont(font18);
+		maB.setBorder(border);
+		maB.setBackground(vlgreen);
+		maB.setActionCommand("maximize");
+		maB.addActionListener(this);
+
+		subMainRightPanel.add(miB);
+		subMainRightPanel.add(maB);
+		subMainRightPanel.add(exB);
+
+		return subMainRightPanel;
 	}
 
 	/*
@@ -373,12 +598,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	 */
 	private Component topPanel() {
 		topPanel = new JPanel();
-		topPanel.setPreferredSize(new Dimension(990, 60));
+		topPanel.setPreferredSize(new Dimension((int) (w * 0.77), (int) (h * 0.125)));
 		topPanel.setLayout(new FlowLayout());
 		topPanel.setBackground(green1);
 
 		JLabel titleInsert = new JLabel("Autorisatie administrator");
-		Font title = new Font(Font.SANS_SERIF, Font.BOLD, 36);
 		titleInsert.setFont(title);
 		titleInsert.setForeground(vlgreen);
 
@@ -392,7 +616,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	 */
 	private Component midLeftPanel() {
 		midLeftPanel = new JPanel();
-		midLeftPanel.setPreferredSize(new Dimension(240, 580));
+		midLeftPanel.setPreferredSize(new Dimension((int) (w * 0.1875), (int) (h * 0.78))); // (240, 580/560)
 		midLeftPanel.setLayout(new FlowLayout());
 		midLeftPanel.setBackground(greend1);
 
@@ -403,107 +627,132 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	/*
-	 * create midLeftTopPanel - part of midLeftPanel 
-	 * contents - JCombobox 
-	 * 			- empty JTextarea's for filling up space
-	 *  		- JButtons
+	 * create midLeftTopPanel - part of midLeftPanel contents - JCombobox - empty
+	 * JTextarea's for filling up space - JButtons
 	 */
 	private Component midLeftTopPanel() {
 		setMidLeftTopPanel(new JPanel());
-		getMidLeftTopPanel().setPreferredSize(new Dimension(240, 510));
-		getMidLeftTopPanel().setLayout(new FlowLayout(10, 10, 10));
+		getMidLeftTopPanel().setPreferredSize(new Dimension((int) (w * 0.1875), (int) (h * 0.68))); // (240, 510/ 490)
+		int y10 = (int) Math.round(h * 0.014); // 16
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int tf12 = (int) Math.round(w * 0.009);
+		getMidLeftTopPanel().setLayout(new FlowLayout(y10, x10, y10));
 		getMidLeftTopPanel().setBackground(greend1);
 
 		String cbActie[] = { "Add new user", "Update User", "Delete User", "Change options UserId",
 				"Reset UserPassword", "Revoke User", "List Users", "List UserId's", "Write to File", "Read from File" };
 		combo = new JComboBox<String>(cbActie);
-		combo.setFont(font18Ar);
+		combo.setFont(font18);
+		combo.setForeground(greend1);
+		combo.setBackground(vlgreen);
+		combo.setBorder(border);
 		combo.addActionListener(this);
 		combo.setActionCommand("actie");
 
 		setUsrSelect(new JLabel("Select user Pattern:"));
 		getUsrSelect().setForeground(vlgreen);
-		getUsrSelect().setFont(font18Ar);
+		getUsrSelect().setFont(font18);
 		getUsrSelect().setBorder(null);
 
-		String cbUsr[] = { "default", "xspp", "uspp", "xrjp", "urjp" };
+	 	String cbUsr[] = userPat.split(",");
 		setCmbUser(new JComboBox<>(cbUsr));
-		getCmbUser().addActionListener(this);
-		getCmbUser().setFont(font18Ar);
-		getCmbUser().setActionCommand("usrSel");
-		usrPat = "default";
+		getCmbUser().setFont(font18);
+		getCmbUser().setForeground(greend1);
+		getCmbUser().setBackground(vlgreen);
+		getCmbUser().setBorder(border);
+		getCmbUser().setSelectedIndex(0);
 
-		iPwdTxt = new JLabel("new Password : ");
-		iPwdTxt.setForeground(vlgreen);
-		iPwdTxt.setFont(font18Ar);
-		iPwdTxt.setBorder(null);
+		setiPwdTxt(new JLabel("new Password : "));
+		getiPwdTxt().setForeground(vlgreen);
+		getiPwdTxt().setFont(font18);
+		getiPwdTxt().setBorder(null);
 
-		iPwdInp = new JPasswordField(12);
-		iPwdInp.setFont(font18Ar);
-		iPwdInp.setBackground(Color.white);
+		iPwdInp = new JPasswordField(tf12);
+		iPwdInp.setFont(font18);
+		iPwdInp.setBorder(border);
+		iPwdInp.setForeground(greend1);
+		iPwdInp.setBackground(vlgreen);
 
-		setEmpty2(new JTextArea(8, 20));
+		int ta8 = (int) Math.round(h * 0.0111);
+		int ta20 = (int) Math.round(w * 0.0165);
+		int ta24 = (int) Math.round(h * 0.0333);
+
+		int e80 = (int) Math.round(w * 0.0625);
+		int e100 = (int) Math.round(w * 0.078);
+		int e40 = (int) Math.round(h * 0.056);
+		int e50 = (int) Math.round(h * 0.069);
+
+		setEmpty2(new JTextArea(ta8, ta20));
 		getEmpty2().setEditable(false);
 		getEmpty2().setBackground(greend1);
 
-		empty3 = new JTextArea(24, 20);
+		empty3 = new JTextArea(ta24, ta20);
 		empty3.setEditable(false);
 		empty3.setBackground(greend1);
 
-		userText = new JLabel();
-		userText.setFont(font18Ar);
+		setUserText(new JLabel());
+		getUserText().setFont(font18);
 
-		userId = new JTextField(12);
-		userId.setFont(font18Ar);
-		userId.setBackground(Color.white);
+		setUserId(new JTextField(tf12));
+		getUserId().setFont(font18);
+		getUserId().setForeground(greend1);
+		getUserId().setBackground(vlgreen);
 
 		ok = new JButton("OK");
-		ok.setPreferredSize(new Dimension(80, 40));
+		ok.setPreferredSize(new Dimension(e80, e40));
 		ok.setFont(font18);
 		ok.setForeground(greend1);
+		ok.setBorder(border);
 		ok.addActionListener(this);
 		ok.setActionCommand("ok");
 
-		ok1 = new JButton("OK");
-		ok1.setPreferredSize(new Dimension(80, 40));
-		ok1.setFont(font18);
-		ok1.setForeground(greend1);
-		ok1.addActionListener(this);
-		ok1.setActionCommand("ok1");
+		setOk1(new JButton("OK"));
+		getOk1().setPreferredSize(new Dimension(e80, e40));
+		getOk1().setFont(font18);
+		getOk1().setBorder(border);
+		getOk1().setForeground(greend1);
+		getOk1().addActionListener(this);
+		getOk1().setActionCommand("ok1");
 
-		ok2 = new JButton("OK");
-		ok2.setPreferredSize(new Dimension(80, 40));
-		ok2.setFont(font18);
-		ok2.setForeground(greend1);
-		ok2.addActionListener(this);
-		ok2.setActionCommand("ok2");
+		setOk2(new JButton("OK"));
+		getOk2().setPreferredSize(new Dimension(e80, e40));
+		getOk2().setFont(font18);
+		getOk2().setBorder(border);
+		getOk2().setForeground(greend1);
+		getOk2().addActionListener(this);
+		getOk2().setActionCommand("ok2");
 
-		back = new JButton("Back");
-		back.setPreferredSize(new Dimension(100, 50));
-		back.setFont(font18);
-		back.setForeground(greend1);
-		back.addActionListener(this);
-		back.setActionCommand("back");
+		setBack(new JButton("Back"));
+		getBack().setPreferredSize(new Dimension(e100, e50));
+		getBack().setFont(font18);
+		getBack().setBorder(border);
+		getBack().setForeground(greend1);
+		getBack().addActionListener(this);
+		getBack().setActionCommand("back");
 
 		return getMidLeftTopPanel();
 	}
 	/*
-	 * Create midLeftBotPanel - part of midLeftPanel 
-	 * Content - JButton (Quit  program)
+	 * Create midLeftBotPanel - part of midLeftPanel Content - JButton (Quit
+	 * program)
 	 */
 
 	private Component midLeftBotPanel() {
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int e100 = (int) Math.round(w * 0.078);
+		int e50 = (int) Math.round(h * 0.069);
 		midLeftBotPanel = new JPanel();
-		midLeftBotPanel.setPreferredSize(new Dimension(240, 50));
-		midLeftBotPanel.setLayout(new FlowLayout(0, 10, 0));
+		midLeftBotPanel.setPreferredSize(new Dimension((int) (w * 0.1875), (int) (h * 0.069))); // (240, 50)
+		midLeftBotPanel.setLayout(new FlowLayout(0, x10, 0));
 		midLeftBotPanel.setBackground(greend1);
 
 		String[] buttonNames = { "Quit", "Logoff" };
 		for (int i = 0; i < 2; i++) {
 			button = new JButton(buttonNames[i]);
 			button.setActionCommand(buttonNames[i]);
-			button.setPreferredSize(new Dimension(100, 50));
+			button.setPreferredSize(new Dimension(e100, e50));
 			button.setFont(font18);
+			button.setBorder(border);
 			button.setForeground(greend1);
 			button.addActionListener(this);
 			midLeftBotPanel.add(button);
@@ -518,21 +767,27 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	 */
 
 	private Component midPanel() {
+		int ta1 = (int) Math.round(h * 0.0014);
+		int ta10 = (int) Math.round(w * 0.0078);
+		int ta10h = (int) Math.round(h * 0.014);
+		int ta11 = (int) Math.round(w * 0.0086);
+		int ta30 = (int) Math.round(h * 0.041);
+
 		midPanel = new JPanel();
-		midPanel.setPreferredSize(new Dimension(670, 580));
+		midPanel.setPreferredSize(new Dimension((int) (w * 0.523), (int) (h * 0.78))); // (670, 580/ 560)
 		midPanel.setLayout(new BorderLayout());
 		midPanel.setBackground(greend1);
 
-		JTextArea emptyN = new JTextArea(10, 10);
+		JTextArea emptyN = new JTextArea(ta1, ta10);
 		emptyN.setEditable(false);
 		emptyN.setBackground(vlgreen);
-		JTextArea emptyW = new JTextArea(30, 11);
+		JTextArea emptyW = new JTextArea(ta30, ta11);
 		emptyW.setEditable(false);
 		emptyW.setBackground(vlgreen);
-		JTextArea emptyS = new JTextArea(10, 10);
+		JTextArea emptyS = new JTextArea(ta10h, ta10);
 		emptyS.setEditable(false);
 		emptyS.setBackground(vlgreen);
-		JTextArea emptyE = new JTextArea(30, 11);
+		JTextArea emptyE = new JTextArea(ta30, ta11);
 		emptyE.setEditable(false);
 		emptyE.setBackground(vlgreen);
 
@@ -547,7 +802,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 	private Component loginPanel() {
 		loginPanel = new JPanel();
-		loginPanel.setPreferredSize(new Dimension(300, 350));
+		loginPanel.setPreferredSize(new Dimension((int) (w * 0.234), (int) (h * 0.486))); // (300, 350)
 		loginPanel.setLayout(new FlowLayout(0, 0, 0));
 		loginPanel.setBackground(greend1);
 
@@ -558,61 +813,79 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	private Component loginPanelL() {
+		int y20 = (int) Math.round(h * 0.028); // 16
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int ta3 = (int) Math.round(h * 0.0042);
+		int ta11 = (int) Math.round(w * 0.0086);
 		loginPanelL = new JPanel();
-		loginPanelL.setPreferredSize(new Dimension(150, 420));
-		loginPanelL.setLayout(new FlowLayout(20, 10, 20));
+		loginPanelL.setPreferredSize(new Dimension((int) (w * 0.117), (int) (h * 0.583))); // (150, 420)
+		loginPanelL.setLayout(new FlowLayout(y20, x10, y20));
 		loginPanelL.setBackground(greend1);
 
-		empty = new JTextArea(3, 11);
+		empty = new JTextArea(ta3, ta11);
 		empty.setEditable(false);
 		empty.setBackground(greend1);
 
 		lgnName = new JLabel("User :");
 		lgnName.setForeground(vlgreen);
-		lgnName.setFont(font24Ar);
+		lgnName.setFont(font24);
 		lgnName.setBorder(null);
 
 		password = new JLabel("Password :");
 		password.setForeground(vlgreen);
-		password.setFont(font24Ar);
+		password.setFont(font24);
 		password.setBorder(null);
 
 		loginPanelL.add(empty);
 		loginPanelL.add(lgnName);
 		loginPanelL.add(password);
-
 		return loginPanelL;
 	}
 
 	private Component loginPanelR() {
+		int y20 = (int) Math.round(h * 0.028); // 16
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int ta3 = (int) Math.round(h * 0.0042);
+		int ta20 = (int) Math.round(w * 0.0165);
+		int tf11 = (int) Math.round(w * 0.0086);
+		int e100 = (int) Math.round(w * 0.078);
+		int e40 = (int) Math.round(h * 0.056);
 		loginPanelR = new JPanel();
-		loginPanelR.setPreferredSize(new Dimension(250, 420));
-		loginPanelR.setLayout(new FlowLayout(20, 10, 20));
+		loginPanelR.setPreferredSize(new Dimension((int) (w * 0.195), (int) (h * 0.583)));// (250, 420)
+		loginPanelR.setLayout(new FlowLayout(y20, x10, y20));
 		loginPanelR.setBackground(greend1);
 
-		empty = new JTextArea(1, 20);
+		empty = new JTextArea(ta3, ta20);
 		empty.setEditable(false);
 		empty.setBackground(greend1);
 
-		inputName = new JTextField(11);
-		inputName.setFont(font24Ar);
+		inputName = new JTextField(tf11);
+		inputName.setFont(font24);
+		inputName.setBackground(vlgreen);
+		inputName.setForeground(greend1);
+		inputName.setBorder(border);
 		inputName.addActionListener(this);
 		inputName.setActionCommand("enter");
 
-		inputPassword = new JPasswordField(11);
-		inputPassword.setFont(font24Ar);
+		inputPassword = new JPasswordField(tf11);
+		inputPassword.setFont(font24);
+		inputPassword.setBackground(vlgreen);
+		inputPassword.setForeground(greend1);
+		inputPassword.setBorder(border);
 		inputPassword.addActionListener(this);
 		inputPassword.setActionCommand("enter");
 
-		beforeEnter = new JTextField(11);
+		beforeEnter = new JTextField(tf11);
 		beforeEnter.setBackground(greend1);
 		beforeEnter.setBorder(null);
 		beforeEnter.setEditable(false);
 
 		enter = new JButton("Enter");
-		enter.setPreferredSize(new Dimension(100, 40));
+		enter.setPreferredSize(new Dimension(e100, e40)); // (100, 40)
 		enter.setActionCommand("enter");
 		enter.setFont(font18);
+		enter.setForeground(greend1);
+		enter.setBorder(border);
 		enter.addActionListener(this);
 
 		loginPanelR.add(empty);
@@ -628,7 +901,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 		chgPwdPanel = new JPanel();
 		chgPwdPanel.setLayout(new FlowLayout(0, 0, 0));
-		chgPwdPanel.setPreferredSize(new Dimension(400, 350));
+		chgPwdPanel.setPreferredSize(new Dimension((int) (w * 0.3125), (int) (h * 0.486))); // (400, 350)
 		chgPwdPanel.setBackground(greend1);
 
 		chgPwdPanel.add(chgPwdPanelL());
@@ -637,28 +910,33 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	private Component chgPwdPanelL() {
+		int y20 = (int) Math.round(h * 0.028); // 16
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int ta1 = (int) Math.round(h * 0.0014);
+		int ta11 = (int) Math.round(w * 0.0086);
+
 		chgPwdPanelL = new JPanel();
-		chgPwdPanelL.setPreferredSize(new Dimension(310, 420));
-		chgPwdPanelL.setLayout(new FlowLayout(20, 10, 20));
+		chgPwdPanelL.setPreferredSize(new Dimension((int) (w * 0.242), (int) (h * 0.583)));// (310, 420)
+		chgPwdPanelL.setLayout(new FlowLayout(y20, x10, y20));
 		chgPwdPanelL.setBackground(greend1);
 
-		empty = new JTextArea(1, 11);
+		empty = new JTextArea(ta1, ta11);
 		empty.setEditable(false);
 		empty.setBackground(greend1);
 
 		oldPw = new JLabel("Password old :");
 		oldPw.setForeground(vlgreen);
-		oldPw.setFont(font24Ar);
+		oldPw.setFont(font24);
 		oldPw.setBorder(null);
 
 		pwdNew1 = new JLabel("Password new :");
 		pwdNew1.setForeground(vlgreen);
-		pwdNew1.setFont(font24Ar);
+		pwdNew1.setFont(font24);
 		pwdNew1.setBorder(null);
 
 		pwdNew2 = new JLabel("Confirm password new :");
 		pwdNew2.setForeground(vlgreen);
-		pwdNew2.setFont(font24Ar);
+		pwdNew2.setFont(font24);
 		pwdNew2.setBorder(null);
 
 		chgPwdPanelL.add(empty);
@@ -670,39 +948,57 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	}
 
 	private Component chgPwdPanelR() {
-		empty = new JTextArea(1, 11);
+		int y20 = (int) Math.round(h * 0.028); // 16
+		int x10 = (int) Math.round(w * 0.008); // 20
+		int ta1 = (int) Math.round(h * 0.0014);
+		int ta11 = (int) Math.round(w * 0.0086);
+		int tf11 = (int) Math.round(w * 0.0086);
+		int e100 = (int) Math.round(w * 0.078);
+		int e40 = (int) Math.round(h * 0.056);
+		empty = new JTextArea(ta1, ta11);
 		empty.setEditable(false);
 		empty.setBackground(greend1);
 
 		chgPwdPanelR = new JPanel();
-		chgPwdPanelR.setPreferredSize(new Dimension(250, 420));
-		chgPwdPanelR.setLayout(new FlowLayout(20, 10, 20));
+		chgPwdPanelR.setPreferredSize(new Dimension((int) (w * 0.195), (int) (h * 0.583)));// (250, 420)
+		chgPwdPanelR.setLayout(new FlowLayout(y20, x10, y20));
 		chgPwdPanelR.setBackground(greend1);
 
-		inpOldPw = new JPasswordField(11);
-		inpOldPw.setFont(font24Ar);
+		inpOldPw = new JPasswordField(tf11);
+		inpOldPw.setFont(font24);
+		inpOldPw.setBackground(vlgreen);
+		inpOldPw.setForeground(greend1);
+		inpOldPw.setBorder(border);
 		inpOldPw.addActionListener(this);
 		inpOldPw.setActionCommand("enter2");
 
-		inpPwdNew1 = new JPasswordField(11);
-		inpPwdNew1.setFont(font24Ar);
+		inpPwdNew1 = new JPasswordField(tf11);
+		inpPwdNew1.setFont(font24);
+		inpPwdNew1.setBackground(vlgreen);
+		inpPwdNew1.setForeground(greend1);
+		inpPwdNew1.setBorder(border);
 		inpPwdNew1.addActionListener(this);
 		inpPwdNew1.setActionCommand("enter2");
 
-		inpPwdNew2 = new JPasswordField(11);
-		inpPwdNew2.setFont(font24Ar);
+		inpPwdNew2 = new JPasswordField(tf11);
+		inpPwdNew2.setFont(font24);
+		inpPwdNew2.setBackground(vlgreen);
+		inpPwdNew2.setForeground(greend1);
+		inpPwdNew2.setBorder(border);
 		inpPwdNew2.addActionListener(this);
 		inpPwdNew2.setActionCommand("enter2");
 
-		beforeEnter = new JTextField(11);
+		beforeEnter = new JTextField(tf11);
 		beforeEnter.setBackground(greend1);
 		beforeEnter.setBorder(null);
 		beforeEnter.setEditable(false);
 
 		enter2 = new JButton("Enter");
-		enter2.setPreferredSize(new Dimension(100, 40));
+		enter2.setPreferredSize(new Dimension(e100, e40));
 		enter2.setActionCommand("enter2");
 		enter2.setFont(font18);
+		enter2.setForeground(greend1);
+		enter2.setBorder(border);
 		enter2.addActionListener(this);
 
 		chgPwdPanelR.add(empty);
@@ -735,19 +1031,18 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 	 */
 	private Component botPanel() {
 		botPanel = new JPanel();
-		botPanel.setPreferredSize(new Dimension(990, 30));
+		botPanel.setPreferredSize(new Dimension((int) (w * 0.77), (int) (h * 0.042))); // (990, 30)
 		botPanel.setLayout(new FlowLayout());
 		botPanel.setBackground(green1);
 
-		Font font = new Font(Font.SANS_SERIF, Font.BOLD, 14);
 		name = new JLabel("Name: null ");
-		name.setFont(font);
+		name.setFont(font14);
 		name.setForeground(vlgreen);
 		loggedIn = new JLabel("Logged in: ");
-		loggedIn.setFont(font);
+		loggedIn.setFont(font14);
 		loggedIn.setForeground(vlgreen);
 		status = new JLabel("false");
-		status.setFont(font);
+		status.setFont(font14);
 		status.setForeground(Color.red);
 
 		botPanel.add(name);
@@ -762,6 +1057,383 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		String buttonTxt = e.getActionCommand();
 
 		switch (buttonTxt) {
+		case "exit": {
+			log.info("Application PWManager closed");
+			int reply = JOptionPane.showConfirmDialog(frame,
+					"Are you sure? \nHave you saved the changes to file? \n" + "If no! choose first option WrFile ",
+					"Close window", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+			if (reply == JOptionPane.OK_OPTION) {
+				// frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				System.exit(0);
+			} else if (reply == JOptionPane.CANCEL_OPTION) {
+				frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				log.info("Window not closed");
+			}
+		}
+			break;
+		/*
+		 * case minimize
+		 */
+		case "minimize": {
+			frame.setState(Frame.ICONIFIED);
+		}
+			break;
+		/*
+		 * case maximize is used for full screen mode and normal screen mode
+		 */
+		case "maximize":
+			if (!fullScr) {
+				fullScr = true;
+				if (!login) {
+					user = inputName.getText();
+					pwdi = inputPassword.getPassword();
+					pwd = String.valueOf(pwdi);
+
+					setFullScreen();
+
+					inputName.setText(user);
+					inputPassword.setText(pwd);
+				}
+
+				if (login) {
+					if (screen.matches("default")) {
+						cpyArea.setText(Console.console.getText());
+						setFullScreen();
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("new")) {
+						id = NewUserScrn.getInpId().getText();
+						color1 = NewUserScrn.getInpId().getBackground();
+						nameF = NewUserScrn.getInpName().getText();
+						nameS = NewUserScrn.getInpSname().getText();
+						email = NewUserScrn.getInpEmail().getText();
+						cVal = (String) NewUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) NewUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) NewUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) NewUserScrn.comboDayS.getSelectedItem();
+						user = NewUserScrn.getInpUserId().getText();
+						pwdi = NewUserScrn.getInpPwInit().getPassword();
+						color2 = NewUserScrn.getInpPwInit().getBackground();
+						pwd = String.valueOf(pwdi);
+						chk = NewUserScrn.checkS;
+						pat = (String) getCmbUser().getSelectedItem();
+						patU = NewUserScrn.usrPat;
+						maxN = maxId;
+						cpyArea.setText(Console.console.getText());
+
+						setFullScreen();
+						Actions.New();
+
+						NewUserScrn.getInpId().setText(id);
+						NewUserScrn.getInpId().setBackground(color1);
+						NewUserScrn.getInpName().setText(nameF);
+						NewUserScrn.getInpSname().setText(nameS);
+						NewUserScrn.getInpEmail().setText(email);
+						NewUserScrn.comboYrS.setSelectedItem(cYrsS);
+						NewUserScrn.comboMthS.setSelectedItem(cMthS);
+						NewUserScrn.comboDayS.setSelectedItem(cDayS);
+						NewUserScrn.comboValid.setSelectedItem(cVal);
+						NewUserScrn.getInpUserId().setText(user);
+						NewUserScrn.getInpUserId().setBackground(color2);
+						NewUserScrn.getInpPwInit().setText(pwd);
+						NewUserScrn.checkS = chk;
+						getCmbUser().setSelectedItem(pat);
+						NewUserScrn.usrPat = patU;
+						maxId = maxN;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("update")) {
+						id = UpdUserScrn.getInpId().getText();
+						color1 = UpdUserScrn.getInpId().getBackground();
+						nameF = UpdUserScrn.getInpFname().getText();
+						nameS = UpdUserScrn.inpSname.getText();
+						email = UpdUserScrn.inpEmail.getText();
+						cVal = (String) UpdUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) UpdUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) UpdUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) UpdUserScrn.comboDayS.getSelectedItem();
+						sts = UpdUserScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						setFullScreen();
+						Actions.Update();
+
+						UpdUserScrn.getInpId().setText(id);
+						UpdUserScrn.getInpId().setBackground(color1);
+						UpdUserScrn.getInpFname().setText(nameF);
+						UpdUserScrn.inpSname.setText(nameS);
+						UpdUserScrn.inpEmail.setText(email);
+						UpdUserScrn.comboYrS.setSelectedItem(cYrsS);
+						UpdUserScrn.comboMthS.setSelectedItem(cMthS);
+						UpdUserScrn.comboDayS.setSelectedItem(cDayS);
+						UpdUserScrn.comboValid.setSelectedItem(cVal);
+						UpdUserScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("change")) {
+						id = UpdUsrIdScrn.getInpId().getText();
+						color1 = UpdUsrIdScrn.getInpId().getBackground();
+						user = UpdUsrIdScrn.getInpUser().getText();
+						cYrsS = (String) UpdUsrIdScrn.comboYrS.getSelectedItem();
+						cMthS = (String) UpdUsrIdScrn.comboMthS.getSelectedItem();
+						cDayS = (String) UpdUsrIdScrn.comboDayS.getSelectedItem();
+						cYrsE = (String) UpdUsrIdScrn.comboYrE.getSelectedItem();
+						cMthE = (String) UpdUsrIdScrn.comboMthE.getSelectedItem();
+						cDayE = (String) UpdUsrIdScrn.comboDayE.getSelectedItem();
+						cVal = (String) UpdUsrIdScrn.comboValid.getSelectedItem();
+						cLvl = (String) UpdUsrIdScrn.comboLvl.getSelectedItem();
+						sts = UpdUsrIdScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						setFullScreen();
+						Actions.Change();
+
+						UpdUsrIdScrn.getInpId().setText(id);
+						UpdUsrIdScrn.getInpId().setBackground(color1);
+						UpdUsrIdScrn.getInpUser().setText(user);
+						UpdUsrIdScrn.comboYrS.setSelectedItem(cYrsS);
+						UpdUsrIdScrn.comboMthS.setSelectedItem(cMthS);
+						UpdUsrIdScrn.comboDayS.setSelectedItem(cDayS);
+						UpdUsrIdScrn.comboYrE.setSelectedItem(cYrsE);
+						UpdUsrIdScrn.comboMthE.setSelectedItem(cMthE);
+						UpdUsrIdScrn.comboDayE.setSelectedItem(cDayE);
+						UpdUsrIdScrn.comboValid.setSelectedItem(cVal);
+						UpdUsrIdScrn.comboLvl.setSelectedItem(cLvl);
+						UpdUsrIdScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("delete")) {
+						id = DelUserScrn.inpId.getText();
+						color1 = DelUserScrn.inpId.getBackground();
+						nameF = DelUserScrn.inpFname.getText();
+						nameS = DelUserScrn.inpSname.getText();
+						email = DelUserScrn.inpEmail.getText();
+						cVal = (String) DelUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) DelUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) DelUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) DelUserScrn.comboDayS.getSelectedItem();
+						sts = DelUserScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						setFullScreen();
+						Actions.Delete();
+
+						DelUserScrn.inpId.setText(id);
+						DelUserScrn.inpId.setBackground(color1);
+						DelUserScrn.inpFname.setText(nameF);
+						DelUserScrn.inpSname.setText(nameS);
+						DelUserScrn.comboYrS.setSelectedItem(cYrsS);
+						DelUserScrn.comboMthS.setSelectedItem(cMthS);
+						DelUserScrn.comboDayS.setSelectedItem(cDayS);
+						DelUserScrn.comboValid.setSelectedItem(cVal);
+						DelUserScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("reset")) {
+						user = userId.getText();
+						pwdi = iPwdInp.getPassword();
+						pwd = String.valueOf(pwdi);
+
+						setFullScreen();
+						Actions.Reset();
+
+						userId.setText(user);
+						iPwdInp.setText(pwd);
+					}
+					if (screen.matches("revoke")) {
+						user = userId.getText();
+
+						setFullScreen();
+						Actions.Revoke();
+
+						userId.setText(user);
+					}
+					if (screen.matches("listuser")) {
+						setFullScreen();
+						Actions.ListUser();
+					}
+					if (screen.matches("listid")) {
+						setFullScreen();
+						Actions.ListId();
+					}
+				}
+				maB.setIcon(new ImageIcon(pathImg + "iconmax3g.gif"));
+				name.setText("name: " + loginName);
+			} else {
+				fullScr = false;
+
+				if (!login) {
+					user = inputName.getText();
+					pwdi = inputPassword.getPassword();
+					pwd = String.valueOf(pwdi);
+
+					endFullScreen();
+
+					inputName.setText(user);
+					inputPassword.setText(pwd);
+				}
+
+				if (login) {
+					if (screen.matches("default")) {
+						cpyArea.setText(Console.console.getText());
+						endFullScreen();
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("new")) {
+						id = NewUserScrn.getInpId().getText();
+						color1 = NewUserScrn.getInpId().getBackground();
+						nameF = NewUserScrn.getInpName().getText();
+						nameS = NewUserScrn.getInpSname().getText();
+						email = NewUserScrn.getInpEmail().getText();
+						cVal = (String) NewUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) NewUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) NewUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) NewUserScrn.comboDayS.getSelectedItem();
+						user = NewUserScrn.getInpUserId().getText();
+						color2 = NewUserScrn.getInpPwInit().getBackground();
+						pwdi = NewUserScrn.getInpPwInit().getPassword();
+						pwd = String.valueOf(pwdi);
+						chk = NewUserScrn.checkS;
+						pat = (String) getCmbUser().getSelectedItem();
+						patU = NewUserScrn.usrPat;
+						maxN = maxId;
+						cpyArea.setText(Console.console.getText());
+
+						endFullScreen();
+						Actions.New();
+
+						NewUserScrn.getInpId().setText(id);
+						NewUserScrn.getInpId().setBackground(color1);
+						NewUserScrn.getInpName().setText(nameF);
+						NewUserScrn.getInpSname().setText(nameS);
+						NewUserScrn.getInpEmail().setText(email);
+						NewUserScrn.comboYrS.setSelectedItem(cYrsS);
+						NewUserScrn.comboMthS.setSelectedItem(cMthS);
+						NewUserScrn.comboDayS.setSelectedItem(cDayS);
+						NewUserScrn.comboValid.setSelectedItem(cVal);
+						NewUserScrn.getInpUserId().setText(user);
+						NewUserScrn.getInpUserId().setBackground(color2);
+						NewUserScrn.getInpPwInit().setText(pwd);
+						NewUserScrn.checkS = chk;
+						getCmbUser().setSelectedItem(pat);
+						NewUserScrn.usrPat = patU;
+						maxId = maxN;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("update")) {
+						id = UpdUserScrn.getInpId().getText();
+						nameF = UpdUserScrn.getInpFname().getText();
+						nameS = UpdUserScrn.inpSname.getText();
+						email = UpdUserScrn.inpEmail.getText();
+						cVal = (String) UpdUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) UpdUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) UpdUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) UpdUserScrn.comboDayS.getSelectedItem();
+						sts = UpdUserScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						endFullScreen();
+						Actions.Update();
+
+						UpdUserScrn.getInpId().setText(id);
+						UpdUserScrn.getInpFname().setText(nameF);
+						UpdUserScrn.inpSname.setText(nameS);
+						UpdUserScrn.inpEmail.setText(email);
+						UpdUserScrn.comboYrS.setSelectedItem(cYrsS);
+						UpdUserScrn.comboMthS.setSelectedItem(cMthS);
+						UpdUserScrn.comboDayS.setSelectedItem(cDayS);
+						UpdUserScrn.comboValid.setSelectedItem(cVal);
+						UpdUserScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("change")) {
+						id = UpdUsrIdScrn.getInpId().getText();
+						user = UpdUsrIdScrn.getInpUser().getText();
+						cYrsS = (String) UpdUsrIdScrn.comboYrS.getSelectedItem();
+						cMthS = (String) UpdUsrIdScrn.comboMthS.getSelectedItem();
+						cDayS = (String) UpdUsrIdScrn.comboDayS.getSelectedItem();
+						cYrsE = (String) UpdUsrIdScrn.comboYrE.getSelectedItem();
+						cMthE = (String) UpdUsrIdScrn.comboMthE.getSelectedItem();
+						cDayE = (String) UpdUsrIdScrn.comboDayE.getSelectedItem();
+						cVal = (String) UpdUsrIdScrn.comboValid.getSelectedItem();
+						cLvl = (String) UpdUsrIdScrn.comboLvl.getSelectedItem();
+						sts = UpdUsrIdScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						endFullScreen();
+						Actions.Change();
+
+						UpdUsrIdScrn.getInpId().setText(id);
+						UpdUsrIdScrn.getInpUser().setText(user);
+						UpdUsrIdScrn.comboYrS.setSelectedItem(cYrsS);
+						UpdUsrIdScrn.comboMthS.setSelectedItem(cMthS);
+						UpdUsrIdScrn.comboDayS.setSelectedItem(cDayS);
+						UpdUsrIdScrn.comboYrE.setSelectedItem(cYrsE);
+						UpdUsrIdScrn.comboMthE.setSelectedItem(cMthE);
+						UpdUsrIdScrn.comboDayE.setSelectedItem(cDayE);
+						UpdUsrIdScrn.comboValid.setSelectedItem(cVal);
+						UpdUsrIdScrn.comboLvl.setSelectedItem(cLvl);
+						UpdUsrIdScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("delete")) {
+						id = DelUserScrn.inpId.getText();
+						nameF = DelUserScrn.inpFname.getText();
+						nameS = DelUserScrn.inpSname.getText();
+						email = DelUserScrn.inpEmail.getText();
+						cVal = (String) DelUserScrn.comboValid.getSelectedItem();
+						cYrsS = (String) DelUserScrn.comboYrS.getSelectedItem();
+						cMthS = (String) DelUserScrn.comboMthS.getSelectedItem();
+						cDayS = (String) DelUserScrn.comboDayS.getSelectedItem();
+						sts = DelUserScrn.status;
+						cpyArea.setText(Console.console.getText());
+
+						endFullScreen();
+						Actions.Delete();
+
+						DelUserScrn.inpId.setText(id);
+						DelUserScrn.inpFname.setText(nameF);
+						DelUserScrn.inpSname.setText(nameS);
+						DelUserScrn.comboYrS.setSelectedItem(cYrsS);
+						DelUserScrn.comboMthS.setSelectedItem(cMthS);
+						DelUserScrn.comboDayS.setSelectedItem(cDayS);
+						DelUserScrn.comboValid.setSelectedItem(cVal);
+						DelUserScrn.status = sts;
+						Console.console.setText(cpyArea.getText());
+					}
+					if (screen.matches("reset")) {
+						user = userId.getText();
+						pwdi = iPwdInp.getPassword();
+						pwd = String.valueOf(pwdi);
+
+						endFullScreen();
+						Actions.Reset();
+
+						userId.setText(user);
+						iPwdInp.setText(pwd);
+					}
+					if (screen.matches("revoke")) {
+						user = userId.getText();
+
+						endFullScreen();
+						Actions.Revoke();
+
+						userId.setText(user);
+					}
+					if (screen.matches("listuser")) {
+						endFullScreen();
+						Actions.ListUser();
+					}
+					if (screen.matches("listid")) {
+						endFullScreen();
+						Actions.ListId();
+					}
+				}
+
+				maB.setIcon(new ImageIcon(pathImg + "iconmax2g.gif"));
+				name.setText("name: " + loginName);
+			}
+			break;
 		/*
 		 * case Enter: used for login
 		 */
@@ -877,17 +1549,21 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							return;
 						}
 						if (valid && !blocked) {
-							if (loginName.equals(isUser) && chkPwStat.equals("i")) {
-								JTextArea emptyN = new JTextArea(9, 10);
+							if (chkPwStat.equals("i")) {
+								int ta4 = (int) Math.round(w * 0.0023);
+								int ta10 = (int) Math.round(w * 0.0078);
+								int ta9 = (int) Math.round(h * 0.0125);
+								int ta30 = (int) Math.round(h * 0.041);
+								JTextArea emptyN = new JTextArea(ta9, ta10);
 								emptyN.setEditable(false);
 								emptyN.setBackground(vlgreen);
-								JTextArea emptyW = new JTextArea(30, 4);
+								JTextArea emptyW = new JTextArea(ta30, ta4);
 								emptyW.setEditable(false);
 								emptyW.setBackground(vlgreen);
-								JTextArea emptyS = new JTextArea(9, 10);
+								JTextArea emptyS = new JTextArea(ta9, ta10);
 								emptyS.setEditable(false);
 								emptyS.setBackground(vlgreen);
-								JTextArea emptyE = new JTextArea(30, 4);
+								JTextArea emptyE = new JTextArea(ta30, ta4);
 								emptyE.setEditable(false);
 								emptyE.setBackground(vlgreen);
 								midPanel.removeAll();
@@ -902,20 +1578,25 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 								return;
 							} else {
+								login = true;
+								existConsole = true;
 								status.setForeground(Color.green);
 								status.setText("true");
 								name.setText("name: " + isUser);
-								mainPanel.remove(midPanel);
-								getMidRightPanel().setPreferredSize(new Dimension(720, 580));
-								mainPanel.revalidate();
-								mainPanel.repaint();
+								subMainMidPanel.remove(midPanel);
+								getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.56), (int) (h * 0.78)));
+								getMidRightPanel().add(new ConsoleScrn(), "newPanel");
+								subMainMidPanel.revalidate();
+								subMainMidPanel.repaint();
+
 								getMidLeftTopPanel().add(combo);
 								getMidLeftTopPanel().add(ok);
 								getMidLeftTopPanel().add(getEmpty2());
 
 								getLog().info("User " + loginName + " logged in ");
 
-								JOptionPane.showMessageDialog(null, "Data Imported");
+								Console.console.append("Data Imported");
+								cpyArea.setText(Console.console.getText());
 								return;
 							}
 						}
@@ -937,7 +1618,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			break;
 
 		/*
-		 * case Enter2: used for change password if initial password 
+		 * case Enter2: used for change password if initial password
 		 */
 		case "enter2":
 
@@ -999,7 +1680,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 									Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 								}
 								Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
-								
+
 								File file2 = new File(pathUid);
 								file2.setWritable(true);
 
@@ -1040,7 +1721,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								bw2.close();
 								// close FileWriter
 								fw2.close();
-								
+
 								Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
 								file2.setReadOnly();
 								/*
@@ -1070,16 +1751,16 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			/*
 			 * Open login screen after changed password
 			 */
-			mainPanel.removeAll();
+			subMainMidPanel.removeAll();
 
-			mainPanel.add(topPanel());
-			mainPanel.add(midLeftPanel());
-			mainPanel.add(midPanel());
-			mainPanel.add(midRightPanel());
-			mainPanel.add(botPanel());
+			subMainMidPanel.add(topPanel());
+			subMainMidPanel.add(midLeftPanel());
+			subMainMidPanel.add(midPanel());
+			subMainMidPanel.add(midRightPanel());
+			subMainMidPanel.add(botPanel());
 
-			mainPanel.repaint();
-			mainPanel.revalidate();
+			subMainMidPanel.repaint();
+			subMainMidPanel.revalidate();
 
 			break;
 
@@ -1089,11 +1770,41 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		case "Quit":
 			if (status.getText().equals("false")) {
 
+				dateTime = LocalDateTime.now();
+				dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
+				fileDate = dateTime.format(dateFormatter);
+
+				if (existConsole) {
+
+					try {
+					 	if (!Console.console.getText().isEmpty()) {
+						Path source1 = Paths.get(consoleF);
+						Path dest1 = Paths.get(consoleFB + fileDate + fileExt);
+
+							if (Files.exists(source1)) {
+								Files.copy(source1, dest1, StandardCopyOption.REPLACE_EXISTING);
+							}
+
+							File fileC = new File(consoleF);
+							FileWriter fwC;
+
+							fwC = new FileWriter(fileC.getAbsoluteFile());
+							BufferedWriter bwC = new BufferedWriter(fwC);
+							bwC.write(Console.console.getText());
+							bwC.close();
+							fwC.close();
+					 	}
+					 	
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 				getLog().info("Program Stopped");
 				System.exit(0);
 			} else {
-				// JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(null, "Log off first", "Message", JOptionPane.INFORMATION_MESSAGE);
+				Console.console.setForeground(red2);
+				Console.console.append("\nLog off first");
 			}
 
 			break;
@@ -1104,15 +1815,20 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		case "Logoff":
 			if (status.getText().equals("true")) {
 				JFrame option = new JFrame();
-				int reply = JOptionPane.showConfirmDialog(option, "Did you save your changes? ", "Logged off",
-						JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-				if (reply == JOptionPane.YES_OPTION) {
-					mainPanel.removeAll();
-					mainPanel.add(topPanel());
-					mainPanel.add(midLeftPanel());
-					mainPanel.add(midPanel());
-					mainPanel.add(midRightPanel());
-					mainPanel.add(botPanel());
+				option.setBackground(vlgreen);
+				option.setForeground(greend1);
+				
+				int reply = JOptionPane.showConfirmDialog(option, "Before you log off SAVE your changes to file!! \n"
+						+ "or you will loose all your changes \n \nChoose OK if you want to log off", "Logged off",
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				if (reply == JOptionPane.OK_OPTION) {
+					login = false;
+					subMainMidPanel.removeAll();
+					subMainMidPanel.add(topPanel());
+					subMainMidPanel.add(midLeftPanel());
+					subMainMidPanel.add(midPanel());
+					subMainMidPanel.add(midRightPanel());
+					subMainMidPanel.add(botPanel());
 					status.setForeground(Color.red);
 					status.setText("false");
 					name.setText("name: " + "");
@@ -1121,7 +1837,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					mainPanel.repaint();
 
 					getLog().info("User " + loginName + " logged off ");
-				} else if (reply == JOptionPane.NO_OPTION) {
+				} else if (reply == JOptionPane.CANCEL_OPTION) {
 					option.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 					getLog().info("Not logged off");
 				}
@@ -1144,225 +1860,28 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					}
 					Integer max = Collections.max(dataMax);
 					maxId = (int) max;
-
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(getUsrSelect());
-					getMidLeftTopPanel().add(getCmbUser());
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().add(new NewUserScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
+					Actions.New();
 				}
 				if (selCmb.contentEquals("Update User")) {
-
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().add(new UpdUserScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
+					Actions.Update();
 				}
 				if (selCmb.contentEquals("Change options UserId")) {
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().add(new UpdUsrIdScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
+					Actions.Change();
 				}
 				if (selCmb.contentEquals("Delete User")) {
-
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().add(new DelUserScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
+					Actions.Delete();
 				}
 				if (selCmb.contentEquals("Reset UserPassword")) {
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
-
-					getMidLeftTopPanel().removeAll();
-
-					userText.setText("Type user_id to reset:");
-					userText.setForeground(vlgreen);
-
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(userText);
-					getMidLeftTopPanel().add(userId);
-					getMidLeftTopPanel().add(iPwdTxt);
-					getMidLeftTopPanel().add(iPwdInp);
-					getMidLeftTopPanel().add(ok2);
-
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
-				}
-				if (selCmb.contentEquals("List Users")) {
-
-					option = "user";
-
-					String[] columnNames = { "UserId", "Name", "Surname", "email-address", "Start-date", "Active" };
-					DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-
-					for (DataUser d1 : userData) {
-						String userId = Integer.toString(d1.getId());
-						String fName = d1.getfName();
-						String sName = d1.getsName();
-						String email = d1.getEmail();
-						String sDate = d1.getsDate();
-						String active = d1.getAct();
-						String[] data = { userId, fName, sName, email, sDate, active };
-						tableModel.addRow(data);
-					}
-
-					DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-					center.setHorizontalAlignment(JLabel.CENTER);
-
-					table1 = new JTable(tableModel);
-					table1.setBackground(vlgreen);
-					table1.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-					table1.getTableHeader().setBackground(vlgreen);
-					table1.getTableHeader().setFont(font18);
-					table1.setFont(font16);
-					table1.setEnabled(false);
-					table1.setPreferredScrollableViewportSize(new Dimension(676, 428));
-
-					table1.getColumnModel().getColumn(0).setPreferredWidth(80);
-					table1.getColumnModel().getColumn(1).setPreferredWidth(180);
-					table1.getColumnModel().getColumn(2).setPreferredWidth(200);
-					table1.getColumnModel().getColumn(3).setPreferredWidth(280);
-					table1.getColumnModel().getColumn(4).setPreferredWidth(120);
-					table1.getColumnModel().getColumn(5).setPreferredWidth(80);
-					table1.getColumnModel().getColumn(4).setCellRenderer(center);
-					table1.getColumnModel().getColumn(5).setCellRenderer(center);
-
-					setJsp(new JScrollPane(table1));
-					getJsp().setBackground(greend1);
-					getJsp().getViewport().setBackground(vlgreen);
-					getJsp().setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-					getJsp().setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(empty3);
-					getMidLeftTopPanel().add(back);
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().setPreferredSize(new Dimension(700, 560));
-					getMidRightPanel().add(new ListScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
-				}
-				if (selCmb.contentEquals("List UserId's")) {
-
-					option = "userid";
-
-					String[] columnNames = { "Auth_Id", "UserId", "Start-date", "End-date", "Valid", "Blocked",
-							"Level", "Pw-Stat" };
-					DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-
-					for (DataUserId d1 : userIdData) {
-						String authid = Integer.toString(d1.getId());
-						String uname = d1.getUser();
-						String sdate = d1.getsDate();
-						String edate = d1.getmDate();
-						String valid1 = Boolean.toString(d1.getVal());
-						String blocked1 = Boolean.toString(d1.getBlock());
-						String level = d1.getLvl();
-						String pwStat = d1.getPwStat();
-
-						String[] data = { authid, uname, sdate, edate, valid1, blocked1, level, pwStat};
-						tableModel.addRow(data);
-					}
-
-					DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-					center.setHorizontalAlignment(JLabel.CENTER);
-
-					table2 = new JTable(tableModel);
-					table2.setBackground(vlgreen);
-					table2.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-					table2.getTableHeader().setBackground(vlgreen);
-					table2.getTableHeader().setFont(font18);
-					table2.setFont(font16);
-					table2.setEnabled(false);
-					table2.setPreferredScrollableViewportSize(new Dimension(676, 428));
-
-					table2.getColumnModel().getColumn(0).setPreferredWidth(70);
-					table2.getColumnModel().getColumn(1).setPreferredWidth(120);
-					table2.getColumnModel().getColumn(2).setPreferredWidth(200);
-					table2.getColumnModel().getColumn(3).setPreferredWidth(120);
-					table2.getColumnModel().getColumn(4).setPreferredWidth(80);
-					table2.getColumnModel().getColumn(5).setPreferredWidth(80);
-					table2.getColumnModel().getColumn(6).setPreferredWidth(70);
- 					table2.getColumnModel().getColumn(7).setPreferredWidth(70);
-					table2.getColumnModel().getColumn(2).setCellRenderer(center);
-					table2.getColumnModel().getColumn(3).setCellRenderer(center);
-					table2.getColumnModel().getColumn(4).setCellRenderer(center);
-					table2.getColumnModel().getColumn(5).setCellRenderer(center);
-					table2.getColumnModel().getColumn(6).setCellRenderer(center);
- 					table2.getColumnModel().getColumn(7).setCellRenderer(center);
-
-					setJsp(new JScrollPane(table2));
-					getJsp().setBackground(greend1);
-					getJsp().getViewport().setBackground(Color.LIGHT_GRAY);
-					getJsp().setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-					getJsp().setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
-					getMidLeftTopPanel().removeAll();
-					getMidLeftTopPanel().add(empty3);
-					getMidLeftTopPanel().add(back);
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().setPreferredSize(new Dimension(700, 560));
-					getMidRightPanel().add(new ListScrn(), "newPanel");
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
+					Actions.Reset();
 				}
 				if (selCmb.contentEquals("Revoke User")) {
-
-					getMidRightPanel().removeAll();
-					getMidRightPanel().revalidate();
-					getMidRightPanel().repaint();
-
-					getMidLeftTopPanel().removeAll();
-
-					userText.setText("Type userid to revoke:");
-					userText.setForeground(vlgreen);
-
-					getMidLeftTopPanel().add(combo);
-					getMidLeftTopPanel().add(ok);
-					getMidLeftTopPanel().add(getEmpty2());
-					getMidLeftTopPanel().add(userText);
-					getMidLeftTopPanel().add(userId);
-					getMidLeftTopPanel().add(ok1);
-
-					getMidLeftTopPanel().revalidate();
-					getMidLeftTopPanel().repaint();
+					Actions.Revoke();
+				}
+				if (selCmb.contentEquals("List Users")) {
+					Actions.ListUser();
+				}
+				if (selCmb.contentEquals("List UserId's")) {
+					Actions.ListId();
 				}
 				if (selCmb.contentEquals("Write to File")) {
 					getMidRightPanel().removeAll();
@@ -1378,7 +1897,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					getMidLeftTopPanel().revalidate();
 					getMidLeftTopPanel().repaint();
 					boolean existsToWrite = true;
-					
+
 					dateTime = LocalDateTime.now();
 					dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 					fileDate = dateTime.format(dateFormatter);
@@ -1395,7 +1914,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								Files.copy(source1, dest1, StandardCopyOption.REPLACE_EXISTING);
 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
 							}
-							
+
 							File file1 = new File(pathUsr);
 							File file2 = new File(pathUid);
 							file1.setWritable(true);
@@ -1463,11 +1982,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							// close FileWriter
 							fw1.close();
 							fw2.close();
-							
+
 							file1.setReadOnly();
 							file2.setReadOnly();
 							Files.setAttribute(source2, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
-							
+
 							JOptionPane.showMessageDialog(null, "Data Exported");
 							getLog().info("Data written to files");
 //							inputCode = null;
@@ -1528,7 +2047,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						}
 
 					}
-					return;	
+					return;
 				}
 				if (selCmb.contentEquals("Read from File")) {
 					getMidRightPanel().removeAll();
@@ -1547,10 +2066,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					userData.clear();
 					userIdData.clear();
 					try {
-						BufferedReader br1 = new BufferedReader(
-								new FileReader(pathUid));
-						BufferedReader br2 = new BufferedReader(
-								new FileReader(pathUsr));
+						BufferedReader br1 = new BufferedReader(new FileReader(pathUid));
+						BufferedReader br2 = new BufferedReader(new FileReader(pathUsr));
 						String line1;
 						String line2;
 
@@ -1593,7 +2110,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					JOptionPane.showMessageDialog(null, "Data Imported");
+					Console.console.append("\nData Imported");
 					getLog().info("Data read from the file");
 
 				}
@@ -1619,8 +2136,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			String newEdate = yrNow + "-" + mthNow + "-" + dayNow;
 
 			if (inpUser.isEmpty()) {
-				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "No input !!", "info", JOptionPane.INFORMATION_MESSAGE);
+				Console.console.setForeground(red2);
+				Console.console.append("\nNo input !!");
 			} else {
 				for (int i = 0; i < userIdData.size(); i++) {
 					if (userIdData.get(i).getUser().equals(inpUser)) {
@@ -1637,15 +2154,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 								new DataUserId(authId, inpUser, selPwd1, sdate, newEdate, val, blk, level, pwStat));
 
 						AuthorizationManager2.getLog().info("userid: " + inpUser + " revoked");
-						JFrame message = new JFrame();
-						JOptionPane.showMessageDialog(message, "user " + inpUser + " revoked", "Info",
-								JOptionPane.INFORMATION_MESSAGE);
+						Console.console.append("\nUser: " + inpUser + " revoked");
 					}
 				}
 				if (!existToRevoke) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "UserId doesn't exists !!! \n Retry", "Info",
-							JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nUser-Id : " + inpUser + " doesn't exists !!! \n Retry");
 				}
 			}
 			getMidLeftTopPanel().removeAll();
@@ -1670,9 +2184,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			existToReset = false;
 
 			if (inpUser.isEmpty() || inpIPw.isEmpty()) {
-				JFrame message = new JFrame();
-				JOptionPane.showMessageDialog(message, "User or new Password is missing \n Fill in the fields ", "info",
-						JOptionPane.INFORMATION_MESSAGE);
+				Console.console.setForeground(red2);
+				Console.console.append("\nUser or new Password is missing !!");
 			} else {
 				for (int i = 0; i < userIdData.size(); i++) {
 					if (userIdData.get(i).getUser().equals(inpUser)) {
@@ -1697,15 +2210,15 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 							 */
 							Path source2 = Paths.get(pathUid);
 							Path dest2 = Paths.get(pathUidH + fileDate + fileExt);
- 							if (Files.exists(source2)) {
- 								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
- 							}
+							if (Files.exists(source2)) {
+								Files.copy(source2, dest2, StandardCopyOption.REPLACE_EXISTING);
+							}
 							File file2 = new File(pathUid);
 							Files.setAttribute(source2, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
 							file2.setWritable(true);
 							FileWriter fw2 = new FileWriter(file2.getAbsoluteFile());
 							BufferedWriter bw2 = new BufferedWriter(fw2);
-							
+
 							String col0;
 							String col1;
 							String col2;
@@ -1753,13 +2266,11 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 						JOptionPane.showMessageDialog(message,
 								"user " + inpUser + " resetted \n new initial password is " + inpIPw, "Info",
 								JOptionPane.INFORMATION_MESSAGE);
-
 					}
 				}
 				if (!existToReset) {
-					JFrame message = new JFrame();
-					JOptionPane.showMessageDialog(message, "user_id doesn't exists !!! \n Retry", "Info",
-							JOptionPane.INFORMATION_MESSAGE);
+					Console.console.setForeground(red2);
+					Console.console.append("\nUser-Id : " + inpUser + " doesn't exists !!! \n Retry");
 				}
 			}
 			getMidLeftTopPanel().removeAll();
@@ -1781,14 +2292,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			getMidLeftTopPanel().repaint();
 
 			getMidRightPanel().removeAll();
-			getMidRightPanel().setPreferredSize(new Dimension(720, 580));
+			getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.5625), (int) (h * 0.78)));
 			getMidRightPanel().revalidate();
 			getMidRightPanel().repaint();
+			setScreen("default");
 
 			break;
-
-		case "usrSel":
-			setUsrPat((String) getCmbUser().getSelectedItem());
 		}
 	}
 
@@ -1815,16 +2324,8 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		return jsp;
 	}
 
-	public void setJsp(JScrollPane jsp) {
+	public static void setJsp(JScrollPane jsp) {
 		AuthorizationManager2.jsp = jsp;
-	}
-
-	public static String getUsrPat() {
-		return usrPat;
-	}
-
-	public void setUsrPat(String usrPat) {
-		AuthorizationManager2.usrPat = usrPat;
 	}
 
 	public static JPanel getMidLeftTopPanel() {
@@ -1857,6 +2358,70 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 
 	public void setCmbUser(JComboBox<String> cmbUser) {
 		AuthorizationManager2.cmbUser = cmbUser;
+	}
+
+	public static JLabel getUserText() {
+		return userText;
+	}
+
+	public void setUserText(JLabel userText) {
+		AuthorizationManager2.userText = userText;
+	}
+
+	public static JTextField getUserId() {
+		return userId;
+	}
+
+	public void setUserId(JTextField userId) {
+		AuthorizationManager2.userId = userId;
+	}
+
+	public static JLabel getiPwdTxt() {
+		return iPwdTxt;
+	}
+
+	public void setiPwdTxt(JLabel iPwdTxt) {
+		AuthorizationManager2.iPwdTxt = iPwdTxt;
+	}
+
+	public static JButton getOk2() {
+		return ok2;
+	}
+
+	public void setOk2(JButton ok2) {
+		AuthorizationManager2.ok2 = ok2;
+	}
+
+	public String getScreen() {
+		return screen;
+	}
+
+	public static void setScreen(String screen) {
+		AuthorizationManager2.screen = screen;
+	}
+
+	public static JButton getOk1() {
+		return ok1;
+	}
+
+	public void setOk1(JButton ok1) {
+		AuthorizationManager2.ok1 = ok1;
+	}
+
+	public static Font getFont16() {
+		return font16;
+	}
+
+	public void setFont16(Font font16) {
+		AuthorizationManager2.font16 = font16;
+	}
+
+	public static JButton getBack() {
+		return back;
+	}
+
+	public void setBack(JButton back) {
+		AuthorizationManager2.back = back;
 	}
 
 }

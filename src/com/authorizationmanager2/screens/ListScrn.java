@@ -14,6 +14,11 @@ import javax.swing.*;
 import com.authorizationmanager2.AuthorizationManager2;
 
 public class ListScrn extends JPanel {
+	/*
+	 * Full screen definitions
+	 */
+	public static int w;
+	public static int h;
 	/**
 	 * Definitions: Panels, Buttons, ComboBoxes, TextAreas, TextFields, Labels,
 	 * etc...
@@ -29,8 +34,6 @@ public class ListScrn extends JPanel {
 	public static JLabel status;
 	public static JLabel txtName;
 	public static JLabel loggedIn;
-
-	private Font font24Ar = new Font("Arial", Font.BOLD, 24);
 
 	public static Color blue1 = new Color(173, 193, 235);
 	public static Color vlblue = new Color(235, 235, 250);
@@ -51,8 +54,10 @@ public class ListScrn extends JPanel {
 	Thread thread1;
 
 	public ListScrn() {
+		w = AuthorizationManager2.scrW;
+		h = AuthorizationManager2.scrH;
 		newPanel = new JPanel();
-		newPanel.setPreferredSize(new Dimension(700, 560));
+		newPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.75)));
 		newPanel.setLayout(new FlowLayout());
 		newPanel.setBackground(greend1);
 		newPanel.setVisible(true);
@@ -65,7 +70,7 @@ public class ListScrn extends JPanel {
 	 */
 	private Component midPanel() {
 		midPanel = new JPanel();
-		midPanel.setPreferredSize(new Dimension(700, 560));
+		midPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.75)));
 		midPanel.setLayout(new FlowLayout());
 		midPanel.setBackground(greend1);
 
@@ -80,7 +85,7 @@ public class ListScrn extends JPanel {
 	 */
 	private Component midTopPanel() {
 		midTopPanel = new JPanel();
-		midTopPanel.setPreferredSize(new Dimension(700, 50));
+		midTopPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.07)));
 		midTopPanel.setLayout(new FlowLayout());
 		midTopPanel.setBackground(vlgreen);
 
@@ -91,7 +96,7 @@ public class ListScrn extends JPanel {
 			titleInsert = (new JLabel("Listing all UserId's"));
 		}
 		titleInsert.setForeground(greend1);
-		titleInsert.setFont(font24Ar);
+		titleInsert.setFont(AuthorizationManager2.font24);
 
 		midTopPanel.add(titleInsert);
 
@@ -103,7 +108,7 @@ public class ListScrn extends JPanel {
 	 */
 	private Component midBotPanel() {
 		midBotPanel = new JPanel();
-		midBotPanel.setPreferredSize(new Dimension(700, 480));
+		midBotPanel.setPreferredSize(new Dimension((int) (w * 0.515), (int) (h * 0.67)));
 		midBotPanel.setLayout(new FlowLayout());
 		midBotPanel.setBackground(vlgreen);
 
