@@ -497,10 +497,12 @@ public class NewUserScrn extends JPanel implements ActionListener {
 		case "Back": {
 			AuthorizationManager2.cpyArea.setText(Console.console.getText());
 			AuthorizationManager2.getMidRightPanel().removeAll();
-
+			AuthorizationManager2.getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.56), (int) (h * 0.78)));
+			AuthorizationManager2.getMidRightPanel().add(new ConsoleScrn(), "newPanel");	
 			AuthorizationManager2.getMidRightPanel().validate();
 			AuthorizationManager2.getMidRightPanel().repaint();
-
+			Console.console.setText(AuthorizationManager2.cpyArea.getText());
+			
 			AuthorizationManager2.getMidLeftTopPanel().removeAll();
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.combo);
 			AuthorizationManager2.getMidLeftTopPanel().add(AuthorizationManager2.ok);

@@ -146,16 +146,26 @@ public class Actions {
 		AuthorizationManager2.option = "user";
 
 		String[] columnNames = { "UserId", "Name", "Surname", "email-address", "Start-date", "Active" };
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Class<?> getColumnClass(int column) {
+				return (column == 0) ? Integer.class : String.class;
+			}
+		};
 
 		for (DataUser d1 : AuthorizationManager2.userData) {
-			String userId = Integer.toString(d1.getId());
+			int userId = d1.getId();
 			String fName = d1.getfName();
 			String sName = d1.getsName();
 			String email = d1.getEmail();
 			String sDate = d1.getsDate();
 			String active = d1.getAct();
-			String[] data = { userId, fName, sName, email, sDate, active };
+			Object[] data = { userId, fName, sName, email, sDate, active };
 			tableModel.addRow(data);
 		}
 
@@ -188,6 +198,8 @@ public class Actions {
 		table.getColumnModel().getColumn(5).setPreferredWidth(tb80);
 		table.getColumnModel().getColumn(4).setCellRenderer(center);
 		table.getColumnModel().getColumn(5).setCellRenderer(center);
+		
+		table.setAutoCreateRowSorter(true);
 
 		AuthorizationManager2.setJsp(new JScrollPane(table));
 		AuthorizationManager2.getJsp().setBackground(AuthorizationManager2.greend1);
@@ -211,10 +223,20 @@ public class Actions {
 
 		String[] columnNames = { "Auth_Id", "UserId", "Start-date", "End-date", "Valid", "Blocked",
 				"Level", "Pw-Stat" };
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Class<?> getColumnClass(int column) {
+				return (column == 0) ? Integer.class : String.class;
+			}
+		};
 
 		for (DataUserId d1 : AuthorizationManager2.userIdData) {
-			String authid = Integer.toString(d1.getId());
+			int authid = d1.getId();
 			String uname = d1.getUser();
 			String sdate = d1.getsDate();
 			String edate = d1.getmDate();
@@ -223,7 +245,7 @@ public class Actions {
 			String level = d1.getLvl();
 			String pwStat = d1.getPwStat();
 
-			String[] data = { authid, uname, sdate, edate, valid1, blocked1, level, pwStat};
+			Object[] data = { authid, uname, sdate, edate, valid1, blocked1, level, pwStat};
 			tableModel.addRow(data);
 		}
 
@@ -243,24 +265,27 @@ public class Actions {
 		table.setPreferredScrollableViewportSize(new Dimension((int) (AuthorizationManager2.w * 0.5), (int) (AuthorizationManager2.h * 0.57)));
 		
 		int tb80 = (int) Math.round(AuthorizationManager2.w * 0.0625);
+		int tb100 = (int) Math.round(AuthorizationManager2.w * 0.078);
 		int tb120 = (int) Math.round(AuthorizationManager2.w * 0.095);
-		int tb70 = (int) Math.round(AuthorizationManager2.w * 0.055);
+//		int tb70 = (int) Math.round(AuthorizationManager2.w * 0.055);
 		int tb200 = (int) Math.round(AuthorizationManager2.w * 0.16);
 
-		table.getColumnModel().getColumn(0).setPreferredWidth(tb70);
+		table.getColumnModel().getColumn(0).setPreferredWidth(tb100);
 		table.getColumnModel().getColumn(1).setPreferredWidth(tb120);
 		table.getColumnModel().getColumn(2).setPreferredWidth(tb200);
 		table.getColumnModel().getColumn(3).setPreferredWidth(tb120);
 		table.getColumnModel().getColumn(4).setPreferredWidth(tb80);
-		table.getColumnModel().getColumn(5).setPreferredWidth(tb80);
-		table.getColumnModel().getColumn(6).setPreferredWidth(tb70);
-		table.getColumnModel().getColumn(7).setPreferredWidth(tb70);
+		table.getColumnModel().getColumn(5).setPreferredWidth(tb100);
+		table.getColumnModel().getColumn(6).setPreferredWidth(tb80);
+		table.getColumnModel().getColumn(7).setPreferredWidth(tb100);
 		table.getColumnModel().getColumn(2).setCellRenderer(center);
 		table.getColumnModel().getColumn(3).setCellRenderer(center);
 		table.getColumnModel().getColumn(4).setCellRenderer(center);
 		table.getColumnModel().getColumn(5).setCellRenderer(center);
 		table.getColumnModel().getColumn(6).setCellRenderer(center);
 		table.getColumnModel().getColumn(7).setCellRenderer(center);
+		
+		table.setAutoCreateRowSorter(true);
 
 		AuthorizationManager2.setJsp(new JScrollPane(table));
 		AuthorizationManager2.getJsp().setBackground(AuthorizationManager2.greend1);

@@ -2285,6 +2285,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 		 * case back: is used for go back from the Listings (User & Userid's)
 		 */
 		case "back":
+			cpyArea.setText(Console.console.getText());
 			getMidLeftTopPanel().removeAll();
 			getMidLeftTopPanel().add(combo);
 			getMidLeftTopPanel().add(ok);
@@ -2292,9 +2293,12 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 			getMidLeftTopPanel().repaint();
 
 			getMidRightPanel().removeAll();
-			getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.5625), (int) (h * 0.78)));
+			getMidRightPanel().setPreferredSize(new Dimension((int) (w * 0.56), (int) (h * 0.78)));
+			getMidRightPanel().add(new ConsoleScrn(), "newPanel");			
 			getMidRightPanel().revalidate();
 			getMidRightPanel().repaint();
+			
+			Console.console.setText(cpyArea.getText());
 			setScreen("default");
 
 			break;
