@@ -1099,6 +1099,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					if (screen.matches("default")) {
 						cpyArea.setText(Console.console.getText());
 						setFullScreen();
+						getMidRightPanel().add(new ConsoleScrn(), "newPanel");
 						Console.console.setText(cpyArea.getText());
 					}
 					if (screen.matches("new")) {
@@ -1277,6 +1278,7 @@ public class AuthorizationManager2 extends JFrame implements ActionListener {
 					if (screen.matches("default")) {
 						cpyArea.setText(Console.console.getText());
 						endFullScreen();
+						getMidRightPanel().add(new ConsoleScrn(), "newPanel");
 						Console.console.setText(cpyArea.getText());
 					}
 					if (screen.matches("new")) {
